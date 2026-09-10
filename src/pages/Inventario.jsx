@@ -509,7 +509,7 @@ export default function InventarioPage() {
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className="p-2.5 rounded-2xl text-neutral-800 md:text-white hover:bg-neutral-100 md:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
+                className="p-2.5 rounded-2xl text-[#1B4820] md:text-white hover:bg-[#1B4820]/10 md:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
                 title="Abrir menú de navegación"
               >
                 <Menu className="w-6 h-6" />
@@ -551,14 +551,15 @@ export default function InventarioPage() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 mt-5 md:mt-8 relative z-0">
 
         {activeFiltersCount > 0 && !isBatchMode && (
-          <div className="mb-4 flex items-center justify-between bg-emerald-100/80 border border-emerald-200 text-emerald-900 px-4 py-3 rounded-2xl">
+          <div className="mb-4 flex items-center justify-between bg-emerald-50 border border-emerald-200/80 text-emerald-950 px-4 py-2.5 rounded-2xl shadow-2xs">
             <span className="text-xs font-bold uppercase tracking-wider">Filtros Activos ({activeFiltersCount})</span>
             <button 
               type="button"
               onClick={clearFilters} 
-              className="text-xs font-black underline hover:text-emerald-950 cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white text-emerald-950 hover:bg-emerald-100/70 border border-emerald-300 text-xs font-black shadow-xs transition-all active:scale-95 cursor-pointer"
             >
-              Limpiar filtros
+              <X className="w-3.5 h-3.5 text-emerald-800 stroke-[2.5]" />
+              <span>Limpiar filtros</span>
             </button>
           </div>
         )}

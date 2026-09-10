@@ -23,7 +23,11 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
   - Extracción dinámica de todas las razas registradas en los animales (`availableBreeds`).
   - Checkboxes con conteo individual de ejemplares por raza.
 - **Gestor Integral de Fincas**:
-  - En [`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx), se agregaron pestañas para visualizar el listado de fincas existentes con su conteo de animales asociados y la opción de registrar nuevos predios.
+  - En [`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx), se agregaron pestañas para visualizar el listado de fincas existentes con su conteo de animales asociados, la opción de registrar nuevos predios y la **edición completa de fincas** con botón de lápiz (`Pencil`), permitiendo actualizar nombre, ubicación y notas.
+- **Botón de Limpieza de Filtros**:
+  - Reemplazado el enlace de texto subrayado por un botón interactivo estructurado con icono `X`, fondo blanco, borde y sombreado.
+- **Estilo de Encabezado Inventario**:
+  - Configuración explícita de color de texto para "Inventario" y el botón de hamburguesa: verde bosque (`#1B4820`) en dispositivos móviles y blanco nítido (`#FFFFFF`) en pantallas de escritorio.
 
 ### Modificado
 - **Reglas de Diseño Globales**:

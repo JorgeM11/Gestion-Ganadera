@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { X, MapPin, Building2, Plus, Users, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { X, MapPin, Building2, Plus, Users, CheckCircle2, Pencil } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { createFarm } from '@/lib/farmUtils';
+import { createFarm, updateFarm } from '@/lib/farmUtils';
 
-export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
-  const [activeView, setActiveView] = useState('list'); // 'list' | 'create'
+export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdated }) {
+  const [activeView, setActiveView] = useState('list'); // 'list' | 'create' | 'edit'
+  const [editingFarm, setEditingFarm] = useState(null);
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
@@ -18,6 +19,33 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
 
   if (!isOpen) return null;
 
+  const handleStartCreate = () => {
+    setEditingFarm(null);
+    setName('');
+    setLocation('');
+    setDescription('');
+    setError('');
+    setActiveView('create');
+  };
+
+  const handleStartEdit = (farm) => {
+    setEditingFarm(farm);
+    setName(farm.name || '');
+    setLocation(farm.location || '');
+    setDescription(farm.description || '');
+    setError('');
+    setActiveView('edit');
+  };
+
+  const handleBackToList = () => {
+    setEditingFarm(null);
+    setName('');
+    setLocation('');
+    setDescription('');
+    setError('');
+    setActiveView('list');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -27,14 +55,26 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
     setIsSaving(true);
     setError('');
     try {
-      const newFarm = await createFarm({ name: name.trim(), location: location.trim(), description: description.trim() });
-      setName('');
-      setLocation('');
-      setDescription('');
-      setSuccessMsg('¡Finca creada con éxito!');
-      setTimeout(() => setSuccessMsg(''), 2500);
-      if (onFarmCreated) onFarmCreated(newFarm);
-      setActiveView('list');
+      if (editingFarm) {
+        const updated = await updateFarm(editingFarm.id, {
+          name: name.trim(),
+          location: location.trim(),
+          description: description.trim()
+        });
+        setSuccessMsg('¡Finca actualizada con éxito!');
+        setTimeout(() => setSuccessMsg(''), 2500);
+        if (onFarmUpdated) onFarmUpdated(updated);
+      } else {
+        const newFarm = await createFarm({
+          name: name.trim(),
+          location: location.trim(),
+          description: description.trim()
+        });
+        setSuccessMsg('¡Finca creada con éxito!');
+        setTimeout(() => setSuccessMsg(''), 2500);
+        if (onFarmCreated) onFarmCreated(newFarm);
+      }
+      handleBackToList();
     } catch (err) {
       setError(err.message || 'Error al guardar la finca');
     } finally {
@@ -53,24 +93,29 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-neutral-900">Gestión de Fincas</h3>
-              <p className="text-xs text-neutral-500">Predios y haciendas ganaderas</p>
+              <h3 className="text-base font-bold text-neutral-900">
+                {activeView === 'edit' ? 'Editar Finca' : 'Gestión de Fincas'}
+              </h3>
+              <p className="text-xs text-neutral-500">
+                {activeView === 'edit' ? `Modificando "${editingFarm?.name}"` : 'Predios y haciendas ganaderas'}
+              </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="p-2 hover:bg-neutral-100 rounded-full transition-colors text-neutral-400 hover:text-neutral-600 cursor-pointer"
+            title="Cerrar"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Pestañas de Vista */}
+        {/* Pestañas de Navegación */}
         <div className="flex items-center gap-2 p-1 bg-neutral-100 rounded-2xl">
           <button
             type="button"
-            onClick={() => { setActiveView('list'); setError(''); }}
+            onClick={handleBackToList}
             className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeView === 'list'
                 ? 'bg-white text-[#1B4820] shadow-xs'
@@ -79,29 +124,39 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
           >
             Fincas Registradas ({farms.length})
           </button>
+
           <button
             type="button"
-            onClick={() => { setActiveView('create'); setError(''); }}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-              activeView === 'create'
+            onClick={activeView === 'edit' ? undefined : handleStartCreate}
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              activeView === 'create' || activeView === 'edit'
                 ? 'bg-[#1B4820] text-white shadow-xs'
                 : 'text-neutral-600 hover:text-black'
             }`}
           >
-            <Plus className="w-3.5 h-3.5" />
-            Nueva Finca
+            {activeView === 'edit' ? (
+              <>
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Editando Finca</span>
+              </>
+            ) : (
+              <>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nueva Finca</span>
+              </>
+            )}
           </button>
         </div>
 
         {successMsg && (
-          <div className="bg-emerald-50 text-emerald-700 text-xs font-bold p-3 rounded-xl flex items-center gap-2">
+          <div className="bg-emerald-50 text-emerald-800 text-xs font-bold p-3 rounded-xl flex items-center gap-2 border border-emerald-200/60">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 text-red-600 text-xs font-semibold p-3 rounded-xl">
+          <div className="bg-red-50 text-red-600 text-xs font-semibold p-3 rounded-xl border border-red-200/60">
             {error}
           </div>
         )}
@@ -114,7 +169,7 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
                 <p className="text-xs font-bold uppercase tracking-wider">No hay fincas registradas aún</p>
                 <button
                   type="button"
-                  onClick={() => setActiveView('create')}
+                  onClick={handleStartCreate}
                   className="mt-3 text-xs font-bold text-[#1B4820] underline cursor-pointer"
                 >
                   Registrar la primera finca
@@ -126,31 +181,41 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
                 return (
                   <div
                     key={f.id}
-                    className="p-3.5 bg-neutral-50 hover:bg-neutral-100 rounded-2xl border border-neutral-200/70 transition-all flex items-center justify-between"
+                    className="p-3.5 bg-neutral-50 hover:bg-neutral-100 rounded-2xl border border-neutral-200/70 transition-all flex items-center justify-between gap-3"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center border border-neutral-200 text-[#1B4820] shrink-0">
                         <Building2 className="w-4 h-4" />
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-neutral-900">{f.name}</h4>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-bold text-neutral-900 truncate">{f.name}</h4>
                         {f.location && (
                           <div className="flex items-center gap-1 text-[11px] text-neutral-500">
                             <MapPin className="w-3 h-3 text-neutral-400 shrink-0" />
-                            <span>{f.location}</span>
+                            <span className="truncate">{f.location}</span>
                           </div>
                         )}
                         {f.description && (
-                          <p className="text-[10px] text-neutral-400 truncate max-w-[220px]">{f.description}</p>
+                          <p className="text-[10px] text-neutral-400 truncate max-w-[200px]">{f.description}</p>
                         )}
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200/60">
                         <Users className="w-3 h-3 text-emerald-600" />
-                        {farmAnimalsCount} animales
+                        {farmAnimalsCount}
                       </span>
+
+                      {/* Botón de Editar Finca */}
+                      <button
+                        type="button"
+                        onClick={() => handleStartEdit(f)}
+                        className="p-2 rounded-xl bg-white hover:bg-[#1B4820] text-neutral-600 hover:text-white border border-neutral-200/80 transition-all shadow-2xs cursor-pointer"
+                        title={`Editar ${f.name}`}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 );
@@ -206,17 +271,17 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated }) {
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => setActiveView('list')}
+                onClick={handleBackToList}
                 className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold py-3.5 rounded-xl transition-colors cursor-pointer"
               >
-                Volver a la lista
+                Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
                 className="flex-1 bg-[#1B4820] hover:bg-emerald-950 text-white text-xs font-bold py-3.5 rounded-xl disabled:opacity-50 transition-all shadow-sm cursor-pointer"
               >
-                {isSaving ? 'Guardando...' : 'Guardar Finca'}
+                {isSaving ? 'Guardando...' : (editingFarm ? 'Actualizar Finca' : 'Guardar Finca')}
               </button>
             </div>
           </form>
