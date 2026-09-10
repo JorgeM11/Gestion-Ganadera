@@ -21,10 +21,26 @@ export async function seedInitialAdminIfNeeded() {
   const defaultAdminPass = 'admin123';
   const passHash = await hashPassword(defaultAdminPass);
 
-  // 1. Verificar si ya existe en Dexie local
-  const localUser = await db.usuarios.where('email').equalsIgnoreCase(defaultAdminEmail).first();
-  if (!localUser && navigator.onLine) {
-    // 2. Verificar en Supabase
+  // 1. Asegurar SIEMPRE el admin en Dexie local para acceso inmediato
+  let localUser = await db.usuarios.where('email').equalsIgnoreCase(defaultAdminEmail).first();
+  if (!localUser) {
+    const newAdmin = {
+      id: '00000000-0000-0000-0000-000000000001',
+      name: 'Administrador Principal',
+      email: defaultAdminEmail,
+      password_hash: passHash,
+      role: 'admin',
+      status: 'Activo',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    await db.usuarios.put(newAdmin);
+    localUser = newAdmin;
+    console.log('[Auth] Admin local asegurado en Dexie.');
+  }
+
+  // 2. Si hay conexión, verificar y reflejar en Supabase
+  if (navigator.onLine) {
     try {
       const { data: serverUsers, error } = await supabase
         .from('usuarios')
@@ -33,31 +49,19 @@ export async function seedInitialAdminIfNeeded() {
         .limit(1);
 
       if (!error && (!serverUsers || serverUsers.length === 0)) {
-        // Crear en Supabase
-        const newAdmin = {
-          name: 'Administrador Principal',
-          email: defaultAdminEmail,
-          password_hash: passHash,
-          role: 'admin',
-          status: 'Activo',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        const { data: inserted, error: insertErr } = await supabase
+        await supabase
           .from('usuarios')
-          .insert(newAdmin)
-          .select()
-          .single();
-
-        if (!insertErr && inserted) {
-          await db.usuarios.put(inserted);
-          console.log('[Auth] Usuario admin por defecto creado con éxito en Supabase y local.');
-        }
-      } else if (serverUsers && serverUsers.length > 0) {
-        await db.usuarios.put(serverUsers[0]);
+          .insert({
+            id: localUser.id,
+            name: localUser.name,
+            email: defaultAdminEmail,
+            password_hash: passHash,
+            role: 'admin',
+            status: 'Activo'
+          });
       }
     } catch (e) {
-      console.warn('[Auth] No se pudo verificar admin inicial en Supabase:', e.message);
+      console.warn('[Auth] Intento de sincronizar admin con Supabase:', e.message);
     }
   }
 }
