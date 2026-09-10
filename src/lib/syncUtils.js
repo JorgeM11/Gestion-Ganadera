@@ -48,7 +48,7 @@ export async function processSyncQueue() {
           payloadToUpload.photo_path = url;
           await db.table(item.table_name).update(payloadToUpload.id, { photo_path: url });
         } catch (imgErr) {
-          throw new Error(`Error de red/auth al subir imagen: ${imgErr.message}`);
+          console.warn(`[Sync Engine] Imagen no subida aún (${imgErr.message}). Continuando subida de datos de ${item.table_name}...`);
         }
       }
 
