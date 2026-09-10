@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, List, TrendingUp, ShieldPlus, Share2, Baby, Loader2 } from 'lucide-react';
+import { ArrowLeft, List, TrendingUp, ShieldPlus, Share2, Baby, Loader2, Milk } from 'lucide-react';
 import { FaVenusMars } from 'react-icons/fa6';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
@@ -11,6 +11,7 @@ import EvolutionTab from '@/components/EvolutionTab';
 import HealthTab from '@/components/HealthTab';
 import GenealogyTab from '@/components/GenealogyTab';
 import ReproductionTab from '@/components/ReproductionTab';
+import MilkingTab from '@/components/MilkingTab';
 
 // UI Components
 import BottomSheet from '@/components/ui/BottomSheet';
@@ -92,6 +93,7 @@ function ProfileContent() {
 
   if (animal.sex === 'Hembra') {
     navItems.push({ id: 'reproduction', label: 'Reproducción', icon: FaVenusMars });
+    navItems.push({ id: 'milking', label: 'Ordeño', icon: Milk });
   }
 
   navItems.push({ id: 'genealogy', label: 'Genealogía', icon: Share2 });
@@ -107,7 +109,8 @@ function ProfileContent() {
           {activeTab === 'details' ? 'Ficha del Animal' :
             activeTab === 'evolution' ? 'Evolución del Animal' :
               activeTab === 'health' ? 'Carnet de Salud' :
-                activeTab === 'reproduction' ? 'Registro Reproductivo' : 'Genealogía'}
+                activeTab === 'reproduction' ? 'Registro Reproductivo' :
+                  activeTab === 'milking' ? 'Control de Ordeño' : 'Genealogía'}
         </h1>
       </header>
 
@@ -133,6 +136,7 @@ function ProfileContent() {
           {activeTab === 'evolution' && <EvolutionTab animal={animal} />}
           {activeTab === 'health' && <HealthTab animal={animal} />}
           {activeTab === 'reproduction' && <ReproductionTab animal={animal} />}
+          {activeTab === 'milking' && <MilkingTab animal={animal} />}
           {activeTab === 'genealogy' && <GenealogyTab animal={animal} />}
         </div>
       </div>

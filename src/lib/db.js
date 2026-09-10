@@ -15,6 +15,7 @@ import Dexie from 'dexie';
  * @typedef {Object} Animal
  * @property {string} id
  * @property {string} user_id
+ * @property {string} [farm_id]
  * @property {string} number
  * @property {string} [birth_date]
  * @property {'Macho' | 'Hembra'} [sex]
@@ -30,6 +31,49 @@ import Dexie from 'dexie';
  * @property {string} [observations]
  * @property {number} [last_weight_kg]
  * @property {string} [last_weight_date]
+ * @property {string} [breed]
+ * @property {number} [purity_percentage]
+ * @property {Record<string, number>} [breed_composition]
+ * @property {string} created_at
+ * @property {string} updated_at
+ * @property {string} [deleted_at]
+ */
+
+/**
+ * @typedef {Object} Farm
+ * @property {string} id
+ * @property {string} user_id
+ * @property {string} name
+ * @property {string} [location]
+ * @property {string} [description]
+ * @property {string} created_at
+ * @property {string} updated_at
+ * @property {string} [deleted_at]
+ */
+
+/**
+ * @typedef {Object} MilkingRecord
+ * @property {string} id
+ * @property {string} user_id
+ * @property {string} animal_id
+ * @property {string} [farm_id]
+ * @property {string} milking_date
+ * @property {'Mañana' | 'Tarde' | 'Único'} shift
+ * @property {number} liters
+ * @property {string} [observations]
+ * @property {string} created_at
+ * @property {string} updated_at
+ * @property {string} [deleted_at]
+ */
+
+/**
+ * @typedef {Object} Usuario
+ * @property {string} id
+ * @property {string} name
+ * @property {string} email
+ * @property {string} password_hash
+ * @property {'admin' | 'operador' | 'veterinario'} role
+ * @property {'Activo' | 'Inactivo' | 'Suspendido'} status
  * @property {string} created_at
  * @property {string} updated_at
  * @property {string} [deleted_at]
@@ -140,6 +184,21 @@ export class GanaderaDB extends Dexie {
             });
         });
 
+        // --- VERSIÓN 6: Fincas, Ordeños, Usuarios y Mejoras Genéticas ---
+        this.version(6).stores({
+            animals: 'id, user_id, farm_id, number, status, sex, breed, purity_percentage, last_weight_kg, last_weight_date, mother_id, father_id, updated_at, deleted_at',
+            farms: 'id, user_id, name, updated_at, deleted_at',
+            milking_records: 'id, user_id, animal_id, farm_id, milking_date, shift, updated_at, deleted_at',
+            usuarios: 'id, email, role, status, updated_at, deleted_at'
+        }).upgrade(tx => {
+            return tx.table('animals').toCollection().modify(animal => {
+                if (!animal.breed) animal.breed = 'Mestizo';
+                if (animal.purity_percentage === undefined || animal.purity_percentage === null) {
+                    animal.purity_percentage = 50;
+                }
+            });
+        });
+
         /** @type {Dexie.Table<Animal, string>} */
         this.animals = this.table('animals');
         /** @type {Dexie.Table<Service, string>} */
@@ -150,6 +209,12 @@ export class GanaderaDB extends Dexie {
         this.health_records = this.table('health_records');
         /** @type {Dexie.Table<GrowthEvent, string>} */
         this.growth_events = this.table('growth_events');
+        /** @type {Dexie.Table<Farm, string>} */
+        this.farms = this.table('farms');
+        /** @type {Dexie.Table<MilkingRecord, string>} */
+        this.milking_records = this.table('milking_records');
+        /** @type {Dexie.Table<Usuario, string>} */
+        this.usuarios = this.table('usuarios');
         /** @type {Dexie.Table<SyncQueueItem, number>} */
         this.sync_queue = this.table('sync_queue');
     }
@@ -169,9 +234,15 @@ export async function clearLocalData() {
     db.pregnancy_checks.clear(),
     db.health_records.clear(),
     db.growth_events.clear(),
+    db.farms.clear(),
+    db.milking_records.clear(),
+    db.usuarios.clear(),
     db.sync_queue.clear()
   ]);
   localStorage.removeItem("lastSyncTimestamp");
   localStorage.removeItem("ganadera_user_id");
+  localStorage.removeItem("ganadera_user_email");
+  localStorage.removeItem("ganadera_user_name");
+  localStorage.removeItem("ganadera_user_role");
   localStorage.removeItem("viewed8Months");
 }

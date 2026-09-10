@@ -1,7 +1,8 @@
 import React from 'react';
-import { IdCard, Network, FileText, Pencil, CircleAlert } from 'lucide-react';
+import { IdCard, Network, FileText, Pencil, CircleAlert, Building2, Dna } from 'lucide-react';
 import AnimalImage from '@/components/inventario/AnimalImage';
 import { calculateAge, formatWeight, formatDateLocal } from '@/lib/dateUtils';
+import { formatGeneticsLabel } from '@/lib/geneticsUtils';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { Link } from 'react-router-dom';
@@ -22,6 +23,11 @@ export default function DetailsTab({ animal, onEdit }) {
       ? db.services.get(animal.origin_service_id)
       : null,
     [animal]
+  );
+
+  const farm = useLiveQuery(
+    () => animal?.farm_id ? db.farms.get(animal.farm_id) : null,
+    [animal?.farm_id]
   );
 
   if (!animal) return null;
@@ -81,9 +87,15 @@ export default function DetailsTab({ animal, onEdit }) {
           </div>
           <div className="grid grid-cols-2 gap-y-4 text-sm">
             <DataRow label="Número / ID" value={`#${animal.number}`} />
+            <DataRow label="Finca / Predio" value={farm?.name ? `🏡 ${farm.name}` : 'Sin finca asignada'} />
             <DataRow label="Fecha Nacimiento" value={formatDateLocal(animal.birth_date)} />
             <DataRow label="Sexo" value={animal.sex || '---'} />
             <DataRow label="Color / Pelaje" value={animal.color || '---'} />
+            <DataRow label="Raza" value={animal.breed || 'Mestizo'} />
+            <DataRow 
+              label="Pureza Genética" 
+              value={`${animal.purity_percentage ?? 50}% (${formatGeneticsLabel(animal.breed, animal.purity_percentage, animal.breed_composition)})`} 
+            />
             {originService && (
               <DataRow 
                 label="Servicio de Origen" 

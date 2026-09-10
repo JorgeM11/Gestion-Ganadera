@@ -2,13 +2,15 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Camera, Save, X, ChevronUp, ChevronDown, Trash2, Plus, CheckCircle, TriangleAlert } from 'lucide-react';
+import { Camera, Save, X, ChevronUp, ChevronDown, Trash2, Plus, CheckCircle, TriangleAlert, Building2, Sparkles } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db } from '@/lib/db';
 import { addToSyncQueue, runFullSync } from '@/lib/syncUtils';
 import { compressImage } from '@/lib/imageUtils';
+import { calculateOffspringGenetics, POPULAR_BREEDS, formatGeneticsLabel } from '@/lib/geneticsUtils';
 import GenealogySelector from './GenealogySelector';
+import FarmModal from './FarmModal';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useNavigate } from 'react-router-dom';
 import { formatShortDateLocal } from '@/lib/dateUtils';
@@ -20,6 +22,12 @@ const animalSchema = z.object({
   sex: z.enum(['Macho', 'Hembra']),
   color: z.string().nullable().optional(),
   origin_service_id: z.string().nullable().optional(),
+
+  // Finca y Genética
+  farm_id: z.string().nullable().optional(),
+  breed: z.string().default('Mestizo'),
+  purity_percentage: z.preprocess((val) => (val === '' || val === null) ? 50 : Number(val), z.number().min(0).max(100).default(50)),
+  breed_composition: z.any().optional(),
 
   birth_date: z.string().nullable().optional().refine(val => !val || new Date(val) <= new Date(), { message: 'La fecha no puede ser futura' }),
   birth_weight_kg: z.preprocess((val) => (val === '' || val === null) ? undefined : Number(val), z.number().optional()),
@@ -95,10 +103,29 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
   const [isSavingQuickService, setIsSavingQuickService] = useState(false);
   const [quickServiceData, setQuickServiceData] = useState({ date: '', type: 'Monta Natural' });
 
+  // --- FINCAS & GENÉTICA ---
+  const [isFarmModalOpen, setIsFarmModalOpen] = useState(false);
+  const [geneticSuggestion, setGeneticSuggestion] = useState(null);
+
+  const farms = useLiveQuery(
+    () => db.farms.filter(f => !f.deleted_at).toArray()
+  ) || [];
+
   const defaultValuesMapped = useMemo(() => {
-    if (!initialValues) return { sex: 'Macho', status: 'Activo' };
+    if (!initialValues) return {
+      sex: 'Macho',
+      status: 'Activo',
+      breed: 'Mestizo',
+      purity_percentage: 50,
+      farm_id: '',
+      breed_composition: null
+    };
     return {
       ...initialValues,
+      farm_id: initialValues.farm_id || '',
+      breed: initialValues.breed || 'Mestizo',
+      purity_percentage: initialValues.purity_percentage ?? 50,
+      breed_composition: initialValues.breed_composition || null,
       current_weight_kg: initialValues.last_weight_kg,
     };
   }, [initialValues]);
@@ -112,6 +139,34 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
   const selectedStatus = watch('status');
   const fatherId = watch('father_id');
   const motherId = watch('mother_id');
+  const selectedFarmId = watch('farm_id');
+  const selectedBreed = watch('breed');
+  const selectedPurity = watch('purity_percentage');
+
+  // Cálculo genético automático al cambiar de padres
+  useEffect(() => {
+    const computeGenetics = async () => {
+      if (!fatherId && !motherId) {
+        setGeneticSuggestion(null);
+        return;
+      }
+      const father = fatherId ? await db.animals.get(fatherId) : null;
+      const mother = motherId ? await db.animals.get(motherId) : null;
+
+      if (father || mother) {
+        const calculated = calculateOffspringGenetics(father, mother);
+        setGeneticSuggestion(calculated);
+
+        // Si es animal nuevo y no tiene raza fija por usuario, auto-asignar
+        if (!initialValues?.id) {
+          setValue('breed', calculated.breed);
+          setValue('purity_percentage', calculated.purity_percentage);
+          setValue('breed_composition', calculated.breed_composition);
+        }
+      }
+    };
+    computeGenetics();
+  }, [fatherId, motherId, initialValues, setValue]);
 
   // --- CARGA DE DATOS AL EDITAR (FASE 3 & MEMORIA) ---
   useEffect(() => {
@@ -349,11 +404,15 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
         const animalData = {
           id: animalId,
           user_id: userId,
+          farm_id: data.farm_id || null,
           number: data.number,
           sex: data.sex,
           status: data.status || 'Activo',
           inactivity_reason: data.status === 'Inactivo' ? (data.inactivity_reason || 'No se especificó una razón para la baja del animal.') : null,
           color: data.color || null,
+          breed: data.breed || 'Mestizo',
+          purity_percentage: Number(data.purity_percentage ?? 50),
+          breed_composition: data.breed_composition || null,
           birth_date: data.birth_date || null,
           mother_id: data.mother_id || null,
           father_id: data.father_id || null,
@@ -469,9 +528,35 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
         </div>
       </section>
 
-      {/* 1. IDENTIFICACIÓN BÁSICA */}
+      {/* 1. IDENTIFICACIÓN BÁSICA Y FINCA */}
       <section className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-100 space-y-4">
         <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-2 block">Identificación Básica</h3>
+
+        {/* FINCA */}
+        <div>
+          <div className="flex items-center justify-between mb-1 ml-1">
+            <label className="text-[10px] font-bold text-neutral-400 uppercase flex items-center gap-1">
+              <Building2 className="w-3.5 h-3.5 text-[#1B4820]" />
+              Finca Asignada
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsFarmModalOpen(true)}
+              className="text-[10px] font-bold text-[#1B4820] hover:underline cursor-pointer flex items-center gap-1"
+            >
+              + Nueva Finca
+            </button>
+          </div>
+          <CustomSelect
+            value={selectedFarmId || ''}
+            onChange={(val) => setValue('farm_id', val || null)}
+            options={[
+              { value: '', label: '— Sin finca asignada —' },
+              ...farms.map(f => ({ value: f.id, label: `🏡 ${f.name}${f.location ? ` (${f.location})` : ''}` }))
+            ]}
+            bgClass="bg-white"
+          />
+        </div>
 
         <div>
           <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Código / Número *</label>
@@ -490,6 +575,81 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
         <div>
           <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Color del Animal</label>
           <input {...register('color')} placeholder="Ej: Rojo Suave" className="w-full bg-white rounded-xl px-4 py-3 text-neutral-800 placeholder-neutral-400 border border-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#1B4820]/20" />
+        </div>
+      </section>
+
+      {/* 2. RAZA Y CARACTERÍSTICAS GENÉTICAS */}
+      <section className="bg-amber-50/40 rounded-3xl p-5 mb-4 border border-amber-100/60 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 rounded-full bg-amber-600"></div>
+            <h3 className="text-base font-bold text-neutral-900">Raza y Genética</h3>
+          </div>
+          <span className="text-xs font-bold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-full">
+            {formatGeneticsLabel(selectedBreed, selectedPurity)}
+          </span>
+        </div>
+
+        {/* Banner de sugerencia genética automática */}
+        {geneticSuggestion && (
+          <div className="bg-white border border-amber-200 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
+              <div>
+                <p className="text-[11px] font-bold text-amber-900 uppercase">Cálculo Genético Heredado</p>
+                <p className="text-xs text-neutral-600 font-medium">{geneticSuggestion.label}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setValue('breed', geneticSuggestion.breed);
+                setValue('purity_percentage', geneticSuggestion.purity_percentage);
+                setValue('breed_composition', geneticSuggestion.breed_composition);
+              }}
+              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer"
+            >
+              Aplicar
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Raza Principal</label>
+            <CustomSelect
+              value={selectedBreed || 'Mestizo'}
+              onChange={(val) => setValue('breed', val)}
+              options={POPULAR_BREEDS.map(b => ({ value: b, label: b }))}
+              bgClass="bg-white"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-1 ml-1">
+              <label className="text-[10px] font-bold text-neutral-400 uppercase">Pureza Genética</label>
+              <span className="text-xs font-bold text-amber-900">{selectedPurity || 50}%</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={selectedPurity ?? 50}
+                onChange={(e) => setValue('purity_percentage', Number(e.target.value))}
+                className="flex-1 accent-amber-600 h-2 bg-neutral-200 rounded-lg cursor-pointer"
+              />
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={selectedPurity ?? 50}
+                onChange={(e) => setValue('purity_percentage', Number(e.target.value))}
+                className="w-16 bg-white border border-neutral-200 rounded-xl px-2 py-2 text-center text-xs font-bold text-neutral-800"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -776,6 +936,13 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
           </button>
         </div>
       )}
+
+      {/* MODAL PARA CREAR NUEVA FINCA */}
+      <FarmModal
+        isOpen={isFarmModalOpen}
+        onClose={() => setIsFarmModalOpen(false)}
+        onFarmCreated={(newFarm) => setValue('farm_id', newFarm.id)}
+      />
     </form>
   );
 }

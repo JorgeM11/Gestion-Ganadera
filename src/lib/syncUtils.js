@@ -108,37 +108,40 @@ export async function processSyncQueue() {
 }
 
 /**
- * 2. PULL: De Nube a Local
+ * 2. PULL: De Nube a Local (Offline-First, sin bloqueo por token JWT)
  */
 export async function pullFromServer() {
-  // FASE 4: Validar sesión de forma segura y silenciosa (con Timeout)
-  let session;
-  try {
-    const { data } = await withTimeout(supabase.auth.getSession(), 6000);
-    session = data?.session;
-  } catch (err) {
-    console.warn('[Sync Engine] PULL abortado por timeout o error de sesión:', err.message);
+  const userId = localStorage.getItem('ganadera_user_id');
+
+  // Si no hay usuario autenticado en local, no descargamos
+  if (!userId) {
+    console.warn('[Sync Engine] PULL abortado: No hay usuario autenticado en local.');
     return;
   }
 
-  // Si no hay sesión válida
-  if (!session?.user) {
-    console.warn('[Sync Engine] PULL abortado: No hay sesión activa en el servidor.');
-    return;
-  }
-
-  const user = session.user;
   const lastSync = localStorage.getItem('lastSyncTimestamp') || '1970-01-01T00:00:00Z';
   const currentSyncTime = new Date().toISOString();
 
-  const tables = ['animals', 'growth_events', 'services', 'pregnancy_checks', 'health_records'];
+  const tables = [
+    'farms',
+    'animals',
+    'growth_events',
+    'services',
+    'pregnancy_checks',
+    'health_records',
+    'milking_records',
+    'usuarios'
+  ];
 
   for (const table of tables) {
-    const { data: serverData, error } = await supabase
-      .from(table)
-      .select('*')
-      .eq('user_id', user.id)
-      .gt('updated_at', lastSync);
+    let query = supabase.from(table).select('*').gt('updated_at', lastSync);
+
+    // Si la tabla maneja user_id, filtramos por el usuario activo (usuarios sincroniza directo)
+    if (table !== 'usuarios') {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data: serverData, error } = await withTimeout(query, 12000);
 
     // Si la descarga falla (ej. pérdida súbita de señal), abortar
     if (error) {

@@ -6,16 +6,29 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 
 ---
 
-## [Sin publicar / En desarrollo]
+## [1.1.0-features] - 2026-09-10
 
 ### Agregado
-- *Espacio reservado para próximas funciones.*
+- **Nueva Base de Datos Supabase**:
+  - Conexión configurada en [`.env.local`](file:///C:/Users/joses/appganadera/App-ganadera-v2/.env.local) con verificación de conectividad y bucket de almacenamiento `animal-photos`.
+  - Esquema completo con 8 tablas: `usuarios`, `farms`, `animals`, `services`, `pregnancy_checks`, `health_records`, `growth_events`, `milking_records`.
+- **Módulo de Usuarios y Autenticación Offline-First**:
+  - Creación de [`src/lib/authService.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/authService.js) con hashing seguro (Web Crypto SHA-256) y validación de estado (`status === 'Activo'`).
+  - Eliminación de la dependencia de tokens JWT de Supabase Auth en el motor de sincronización (`syncUtils.js`), evitando la expulsión o bloqueo de usuarios sin internet.
+- **Gestión Multi-Finca**:
+  - Utilidad [`src/lib/farmUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/farmUtils.js) y componente modal [`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx).
+  - Filtro interactivo de fincas en [`Inventario.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Inventario.jsx) y visualización de la finca en las fichas de animales.
+- **Lógica Genética y Mestizaje**:
+  - Módulo [`src/lib/geneticsUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/geneticsUtils.js) con cálculo biológico de herencia (50% padre, 50% madre), ponderación de purezas parentales y detección automática de cruces F1 y mestizajes.
+  - Auto-cálculo y banner interactivo en [`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx) al seleccionar padre y madre.
+- **Módulo de Control de Ordeño y Producción Lechera**:
+  - Utilidad [`src/lib/milkingUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/milkingUtils.js) para registro por turnos (Mañana, Tarde, Único), cálculos acumulados y promedios diarios.
+  - Componente modal de registro rápido [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx).
+  - Nueva pestaña [`MilkingTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/MilkingTab.jsx) en el perfil de las hembras con estadísticas y tabla histórica de pesajes.
 
 ### Modificado
-- *Espacio reservado para mejoras y refactorizaciones.*
-
-### Corregido
-- *Espacio reservado para resolución de incidencias.*
+- Esquema local Dexie ([`src/lib/db.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/db.js)) actualizado a versión 6 integrando las nuevas tablas e índices.
+- Motor de sincronización ([`src/lib/syncUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/syncUtils.js)) optimizado para sincronizar las 8 tablas sin depender de sesiones JWT caducadas.
 
 ---
 

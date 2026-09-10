@@ -1,12 +1,16 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, SlidersHorizontal, Scale, Plus, X, Syringe, ClipboardPlus, CheckCircle2, XCircle, Check, AlertCircle, RefreshCcw, CheckCircle, LogOut } from 'lucide-react';
+import { Search, SlidersHorizontal, Scale, Plus, X, Syringe, ClipboardPlus, CheckCircle2, XCircle, Check, AlertCircle, RefreshCcw, CheckCircle, LogOut, Building2, Milk, Sparkles } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, clearLocalData } from '@/lib/db';
 import { calculateAge, formatWeight, parseLocalDate } from '@/lib/dateUtils';
+import { formatGeneticsLabel } from '@/lib/geneticsUtils';
+import { logoutUser } from '@/lib/authService';
 import SyncStatus from '@/components/ui/SyncStatus';
 import AnimalImage from '@/components/inventario/AnimalImage';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import FarmModal from '@/components/inventario/FarmModal';
+import MilkingModal from '@/components/inventario/MilkingModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForceResync } from '@/hooks/useForceResync';
 import { supabase } from '@/lib/supabaseClient';
@@ -15,10 +19,9 @@ import { runFullSync } from '@/lib/syncUtils';
 const actionOptions = [
   { label: 'Cerrar Sesión', icon: LogOut, type: 'logout' },
   { label: 'Respaldo Forzado', icon: RefreshCcw, type: 'resync' },
-  
+  { label: 'Nueva Finca', icon: Building2, type: 'new_farm' },
   { label: 'Vacunación por Lotes', icon: Syringe, type: 'batch' },
   { label: 'Nuevo Registro', icon: ClipboardPlus, href: '/inventario/nuevo' },
-  
 ];
 
 const ITEMS_PER_PAGE = 50;
@@ -92,13 +95,21 @@ export default function InventarioPage() {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [pendingLogoutCount, setPendingLogoutCount] = useState(0);
 
+  // --- ESTADOS PARA FINCAS Y ORDEÑO ---
+  const [selectedFarmFilter, setSelectedFarmFilter] = useState('ALL');
+  const [isFarmModalOpen, setIsFarmModalOpen] = useState(false);
+  const [milkingAnimal, setMilkingAnimal] = useState(null);
+
+  const farms = useLiveQuery(() => db.farms.filter(f => !f.deleted_at).toArray()) || [];
+  const farmMap = useMemo(() => {
+    const map = {};
+    farms.forEach(f => { map[f.id] = f.name; });
+    return map;
+  }, [farms]);
+
   const executeLogout = async () => {
     try {
-      try {
-        await supabase.auth.signOut();
-      } catch (e) {
-        console.warn('No se pudo cerrar sesión en el servidor (posiblemente offline):', e);
-      }
+      logoutUser();
       await clearLocalData();
       navigate("/login");
     } catch (err) {
@@ -130,9 +141,12 @@ export default function InventarioPage() {
     }));
   };
 
-  const clearFilters = () => setFilters({ sex: [], status: [], category: [] });
+  const clearFilters = () => {
+    setFilters({ sex: [], status: [], category: [] });
+    setSelectedFarmFilter('ALL');
+  };
 
-  const activeFiltersCount = filters.sex.length + filters.status.length + filters.category.length;
+  const activeFiltersCount = filters.sex.length + filters.status.length + filters.category.length + (selectedFarmFilter !== 'ALL' ? 1 : 0);
 
   // Lógica para detectar exactamente los 8 meses
   const is8MonthsOld = (animal) => {
@@ -153,6 +167,7 @@ export default function InventarioPage() {
       const matchesSex = filters.sex.length === 0 || filters.sex.includes(a.sex);
       const currentStatus = a.status || 'Activo';
       const matchesStatus = filters.status.length === 0 || filters.status.includes(currentStatus);
+      const matchesFarm = selectedFarmFilter === 'ALL' || a.farm_id === selectedFarmFilter;
 
       let category = 'Desconocida';
       if (a.birth_date) {
@@ -165,7 +180,7 @@ export default function InventarioPage() {
       }
       const matchesCategory = filters.category.length === 0 || filters.category.includes(category);
 
-      return matchesSearch && matchesSex && matchesStatus && matchesCategory;
+      return matchesSearch && matchesSex && matchesStatus && matchesCategory && matchesFarm;
     });
 
     // Ordenar: Los de 8 meses resaltados van de primeros
@@ -290,6 +305,53 @@ export default function InventarioPage() {
             </div>
 
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-black text-neutral-900 uppercase tracking-wider">Finca</h4>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsFilterOpen(false);
+                      setIsFarmModalOpen(true);
+                    }}
+                    className="text-[11px] font-bold text-[#1B4820] hover:underline cursor-pointer"
+                  >
+                    + Nueva Finca
+                  </button>
+                </div>
+                <div className="space-y-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFarmFilter('ALL')}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedFarmFilter === 'ALL'
+                        ? 'bg-[#1B4820] text-white shadow-xs'
+                        : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                    }`}
+                  >
+                    Todas las Fincas ({allAnimals?.length || 0})
+                  </button>
+                  {farms.map(f => {
+                    const count = allAnimals?.filter(a => a.farm_id === f.id).length || 0;
+                    return (
+                      <button
+                        type="button"
+                        key={f.id}
+                        onClick={() => setSelectedFarmFilter(f.id)}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                          selectedFarmFilter === f.id
+                            ? 'bg-[#1B4820] text-white shadow-xs'
+                            : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                        }`}
+                      >
+                        <span className="truncate">🏡 {f.name}</span>
+                        <span className="opacity-75 ml-2 text-[10px]">({count})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div>
                 <h4 className="text-sm font-black text-neutral-900 mb-2 uppercase tracking-wider">Estatus del Animal</h4>
                 <div className="space-y-0.5">
@@ -421,26 +483,57 @@ export default function InventarioPage() {
 
                     <div className="px-5 pt-4 pb-6 flex flex-col justify-between flex-1 gap-1">
                       <div>
-                        <div className={`inline-block px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest text-white mb-2 ${animal.sex === 'Hembra' ? 'bg-pink-600' : 'bg-blue-700'}`}>
-                          {animal.sex}
+                        <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                          <div className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest text-white ${animal.sex === 'Hembra' ? 'bg-pink-600' : 'bg-blue-700'}`}>
+                            {animal.sex}
+                          </div>
+                          {animal.breed && (
+                            <div className="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-100/90 text-amber-900 border border-amber-200/60">
+                              {formatGeneticsLabel(animal.breed, animal.purity_percentage, animal.breed_composition)}
+                            </div>
+                          )}
+                          {animal.farm_id && farmMap[animal.farm_id] && (
+                            <div className="px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/50 flex items-center gap-1">
+                              <Building2 className="w-2.5 h-2.5" />
+                              <span className="max-w-[100px] truncate">{farmMap[animal.farm_id]}</span>
+                            </div>
+                          )}
                         </div>
                         <h2 
-  className="text-lg sm:text-xl md:text-2xl font-black text-black leading-tight mb-1" 
-  title={`#${animal.number}`}
->
-  <span className="md:hidden">
-    #{animal.number.length > 10 ? animal.number.substring(0, 10) + '...' : animal.number}
-  </span>
-  <span className="hidden md:inline">
-    #{animal.number.length > 12 ? animal.number.substring(0, 12) + '...' : animal.number}
-  </span>
-</h2>
+                          className="text-lg sm:text-xl md:text-2xl font-black text-black leading-tight mb-1" 
+                          title={`#${animal.number}`}
+                        >
+                          <span className="md:hidden">
+                            #{animal.number.length > 10 ? animal.number.substring(0, 10) + '...' : animal.number}
+                          </span>
+                          <span className="hidden md:inline">
+                            #{animal.number.length > 12 ? animal.number.substring(0, 12) + '...' : animal.number}
+                          </span>
+                        </h2>
                         <p className="text-xs text-neutral-700 font-bold uppercase tracking-wider">{calculateAge(animal.birth_date)}</p>
                       </div>
 
-                      <div className="flex items-center text-black mt-4 bg-neutral-100 border border-neutral-200 w-fit px-3 py-2 rounded-xl">
-                        <Scale className="w-4 h-4 mr-2 text-[#1B4820]" strokeWidth={3} />
-                        <span className="text-sm font-black tracking-tight">{formatWeight(animal.last_weight_kg)}</span>
+                      <div className="flex items-center justify-between mt-3 gap-2">
+                        <div className="flex items-center text-black bg-neutral-100 border border-neutral-200 w-fit px-3 py-1.5 rounded-xl">
+                          <Scale className="w-4 h-4 mr-2 text-[#1B4820]" strokeWidth={3} />
+                          <span className="text-sm font-black tracking-tight">{formatWeight(animal.last_weight_kg)}</span>
+                        </div>
+
+                        {animal.sex === 'Hembra' && !isBatchMode && (
+                          <button
+                            type="button"
+                            title="Registrar Ordeño"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setMilkingAnimal(animal);
+                            }}
+                            className="py-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl border border-blue-200/70 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                          >
+                            <Milk className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Ordeño</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </article>
@@ -576,6 +669,9 @@ export default function InventarioPage() {
                         if (option.type === 'batch') {
                           setIsBatchMode(true);
                           setIsFabOpen(false);
+                        } else if (option.type === 'new_farm') {
+                          setIsFabOpen(false);
+                          setIsFarmModalOpen(true);
                         } else if (option.type === 'resync') {
                           await handleForceSync(() => setIsFabOpen(false));
                         } else if (option.type === 'logout') {
@@ -657,6 +753,19 @@ export default function InventarioPage() {
         }}
         onCancel={() => setIsLogoutConfirmOpen(false)}
         isDanger={true}
+      />
+
+      {/* MODAL CREAR NUEVA FINCA */}
+      <FarmModal
+        isOpen={isFarmModalOpen}
+        onClose={() => setIsFarmModalOpen(false)}
+      />
+
+      {/* MODAL REGISTRO DE ORDEÑO RÁPIDO */}
+      <MilkingModal
+        isOpen={!!milkingAnimal}
+        animal={milkingAnimal}
+        onClose={() => setMilkingAnimal(null)}
       />
     </main>
   );
