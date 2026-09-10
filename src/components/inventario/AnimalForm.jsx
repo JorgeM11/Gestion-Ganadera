@@ -552,7 +552,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
             onChange={(val) => setValue('farm_id', val || null)}
             options={[
               { value: '', label: '— Sin finca asignada —' },
-              ...farms.map(f => ({ value: f.id, label: `🏡 ${f.name}${f.location ? ` (${f.location})` : ''}` }))
+              ...farms.map(f => ({ value: f.id, label: `${f.name}${f.location ? ` (${f.location})` : ''}` }))
             ]}
             bgClass="bg-white"
           />
@@ -661,8 +661,8 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
             value={selectedStatus}
             onChange={(val) => setValue('status', val)}
             options={[
-              { value: 'Activo', label: '🟢 Activo (En el inventario)' },
-              { value: 'Inactivo', label: '🔴 Inactivo (Vendido, Muerte, etc.)' }
+              { value: 'Activo', label: 'Activo (En el inventario)' },
+              { value: 'Inactivo', label: 'Inactivo (Vendido, Muerte, etc.)' }
             ]}
           />
         </div>

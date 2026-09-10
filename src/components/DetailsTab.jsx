@@ -87,7 +87,7 @@ export default function DetailsTab({ animal, onEdit }) {
           </div>
           <div className="grid grid-cols-2 gap-y-4 text-sm">
             <DataRow label="Número / ID" value={`#${animal.number}`} />
-            <DataRow label="Finca / Predio" value={farm?.name ? `🏡 ${farm.name}` : 'Sin finca asignada'} />
+            <DataRow label="Finca / Predio" value={farm?.name ? farm.name : 'Sin finca asignada'} />
             <DataRow label="Fecha Nacimiento" value={formatDateLocal(animal.birth_date)} />
             <DataRow label="Sexo" value={animal.sex || '---'} />
             <DataRow label="Color / Pelaje" value={animal.color || '---'} />

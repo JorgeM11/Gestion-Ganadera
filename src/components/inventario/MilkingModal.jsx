@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Milk, Calendar, Clock } from 'lucide-react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/db';
 import { createMilkingRecord } from '@/lib/milkingUtils';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { DateInput } from '@/components/ui/DateInput';
 
 export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated }) {
+  const [selectedAnimalId, setSelectedAnimalId] = useState(animal?.id || '');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [shift, setShift] = useState('Mañana');
   const [liters, setLiters] = useState('');
@@ -12,10 +15,31 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
-  if (!isOpen || !animal) return null;
+  // Cargar vacas si no vino animal preseleccionado
+  const femaleCows = useLiveQuery(
+    () => db.animals.filter(a => a.sex === 'Hembra' && !a.deleted_at).toArray(),
+    []
+  ) || [];
+
+  useEffect(() => {
+    if (animal) {
+      setSelectedAnimalId(animal.id);
+    } else if (femaleCows.length > 0 && !selectedAnimalId) {
+      setSelectedAnimalId(femaleCows[0].id);
+    }
+  }, [animal, femaleCows]);
+
+  if (!isOpen) return null;
+
+  const currentAnimal = animal || femaleCows.find(a => a.id === selectedAnimalId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!currentAnimal) {
+      setError('Debes seleccionar una vaca para registrar el ordeño');
+      return;
+    }
+
     const parsed = Number(liters);
     if (!liters || isNaN(parsed) || parsed <= 0) {
       setError('Ingresa una cantidad válida de litros mayor a 0');
@@ -26,8 +50,8 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
     setError('');
     try {
       const record = await createMilkingRecord({
-        animal_id: animal.id,
-        farm_id: animal.farm_id || null,
+        animal_id: currentAnimal.id,
+        farm_id: currentAnimal.farm_id || null,
         milking_date: date,
         shift,
         liters: parsed,
@@ -45,7 +69,7 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
           <div className="flex items-center gap-3">
@@ -54,13 +78,17 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
             </div>
             <div>
               <h3 className="text-base font-bold text-neutral-900">Registro de Ordeño</h3>
-              <p className="text-xs text-neutral-500">Vaca: #{animal.number} {animal.breed ? `(${animal.breed})` : ''}</p>
+              <p className="text-xs text-neutral-500">
+                {currentAnimal 
+                  ? `Vaca: #${currentAnimal.number} ${currentAnimal.breed ? `(${currentAnimal.breed})` : ''}`
+                  : 'Control lechero diario'}
+              </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 hover:bg-neutral-100 rounded-full transition-colors text-neutral-400 hover:text-neutral-600"
+            className="p-2 hover:bg-neutral-100 rounded-full transition-colors text-neutral-400 hover:text-neutral-600 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,14 +101,31 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!animal && (
+            <div>
+              <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 block">
+                Seleccionar Vaca *
+              </label>
+              <CustomSelect
+                value={selectedAnimalId}
+                onChange={setSelectedAnimalId}
+                options={femaleCows.map(cow => ({
+                  value: cow.id,
+                  label: `#${cow.number} - ${cow.breed || 'Vaca'}`
+                }))}
+                placeholder="Selecciona una vaca..."
+                bgClass="bg-neutral-50"
+              />
+            </div>
+          )}
+
           <div>
             <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 block">
               Fecha de Ordeño *
             </label>
             <DateInput
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#1B4820]/20"
+              onChange={setDate}
             />
           </div>
 
@@ -92,9 +137,9 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
               value={shift}
               onChange={setShift}
               options={[
-                { value: 'Mañana', label: '🌅 Turno Mañana' },
-                { value: 'Tarde', label: '🌇 Turno Tarde' },
-                { value: 'Único', label: '🥛 Turno Único / Día Completo' }
+                { value: 'Mañana', label: 'Turno Mañana' },
+                { value: 'Tarde', label: 'Turno Tarde' },
+                { value: 'Único', label: 'Turno Único / Día Completo' }
               ]}
               bgClass="bg-neutral-50"
             />
@@ -113,39 +158,39 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
                 onChange={(e) => setLiters(e.target.value)}
                 placeholder="Ej. 14.5"
                 className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-[#1B4820]/20"
-                autoFocus
+                required
               />
-              <span className="absolute right-4 top-3 text-xs font-bold text-neutral-400">Litros</span>
+              <span className="absolute right-4 top-3.5 text-xs font-bold text-neutral-400">Lts</span>
             </div>
           </div>
 
           <div>
             <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 block">
-              Observaciones
+              Observaciones (Opcional)
             </label>
             <textarea
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
-              placeholder="Ej. Buena bajada de leche, suplemento concentrado..."
+              placeholder="Ej. Buena ubre, ordeño manual..."
               rows={2}
-              className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#1B4820]/20 resize-none"
+              className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-[#1B4820]/20 resize-none"
             />
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="pt-2 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold py-3.5 rounded-xl transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-neutral-600 hover:bg-neutral-100 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 bg-[#1B4820] hover:bg-[#143718] text-white text-xs font-bold py-3.5 rounded-xl disabled:opacity-50 transition-all shadow-sm cursor-pointer"
+              className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-[#1B4820] hover:bg-emerald-950 transition-colors shadow-md disabled:opacity-50 cursor-pointer"
             >
-              {isSaving ? 'Registrando...' : 'Registrar Ordeño'}
+              {isSaving ? 'Guardando...' : 'Guardar Registro'}
             </button>
           </div>
         </form>

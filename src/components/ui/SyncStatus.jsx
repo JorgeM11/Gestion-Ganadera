@@ -43,28 +43,28 @@ export default function SyncStatus() {
 
   if (!isOnline) {
     StatusIcon = CloudOff;
-    statusText = 'Offline 🔴';
+    statusText = 'Offline';
     statusColor = 'text-red-500';
     bgColor = 'bg-red-50';
   } else if (syncStatus === 'SYNCING') {
     StatusIcon = RefreshCw;
-    statusText = 'Sincronizando 🔄';
+    statusText = 'Sincronizando';
     statusColor = 'text-blue-500';
     bgColor = 'bg-blue-50';
     isRotating = true;
   } else if (pendingItemsCount > 0) {
     StatusIcon = AlertCircle;
-    statusText = `Pendiente (${pendingItemsCount}) 🟡`;
+    statusText = `Pendiente (${pendingItemsCount})`;
     statusColor = 'text-amber-500';
     bgColor = 'bg-amber-50';
   } else if (syncStatus === 'ERROR') {
     StatusIcon = AlertCircle;
-    statusText = 'Red Inestable ⚠️';
+    statusText = 'Red Inestable';
     statusColor = 'text-orange-500';
     bgColor = 'bg-orange-50';
   } else {
     StatusIcon = CheckCircle2;
-    statusText = 'Respaldado 🟢';
+    statusText = 'Respaldado';
     statusColor = 'text-emerald-600';
     bgColor = 'bg-emerald-50';
   }

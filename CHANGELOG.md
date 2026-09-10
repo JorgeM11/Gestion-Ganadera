@@ -6,6 +6,47 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 
 ---
 
+## [1.2.0-ui-inventario] - 2026-09-10
+
+### Agregado
+- **Menú Lateral Hamburguesa (Navigation Drawer)**:
+  - Componente [`NavigationDrawer.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/NavigationDrawer.jsx) con animaciones fluidas (`framer-motion`), fondo difuminado y diseño responsive.
+  - Opciones integradas:
+    1. **Inventario**: Navegación y estado activo.
+    2. **Fincas**: Abre el gestor modal de fincas con contador dinámico.
+    3. **Ordeño**: Acceso rápido al registro de ordeño lechero con selector de vacas hembras.
+    4. **Respaldo Forzado**: Disparador de sincronización en la nube con indicador de progreso animado.
+    5. **Cerrar Sesión**: Cierre seguro con verificación previa de cambios pendientes en cola offline (`sync_queue`).
+- **Estados de Carga con Skeletons**:
+  - Componente [`AnimalCardSkeleton.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalCardSkeleton.jsx) con tarjetas animadas en pulso que eliminan parpadeos y saltos de layout (*layout shift*) durante la carga de Dexie.
+- **Filtro por Raza en Inventario**:
+  - Extracción dinámica de todas las razas registradas en los animales (`availableBreeds`).
+  - Checkboxes con conteo individual de ejemplares por raza.
+- **Gestor Integral de Fincas**:
+  - En [`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx), se agregaron pestañas para visualizar el listado de fincas existentes con su conteo de animales asociados y la opción de registrar nuevos predios.
+
+### Modificado
+- **Reglas de Diseño Globales**:
+  - **Cero Emojis**: Reemplazo total de emojis (🏡, 🟢, 🔴, 🌅, 🌇, 🥛, 🔄, 🟡, ⚠️) en todo el código fuente por iconos vectoriales consistentes de `lucide-react`.
+  - **Punteros Interactivos**: Implementación de `cursor-pointer` en todos los elementos clickeables (tarjetas, botones, selectores, filtros y drawer).
+  - **Diseño Responsive & Proporciones**: Rejilla adaptativa optimizada (`grid-cols-1 min-[460px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`) para que las tarjetas tengan mayor amplitud sin desbordarse.
+- **Header Principal**:
+  - Título actualizado a **"Inventario"** e incorporación del botón hamburguesa interactivo a su izquierda.
+- **Tarjetas de Animales (Card Layout Limpio)**:
+  - Estructuración vertical sin solapamiento de información:
+    1. Imagen con aspecto 4:3, zoom suave en hover, badge de status (`Activo`/`Inactivo`) y badge de sexo (`Hembra`/`Macho`).
+    2. Título principal (`animal.name` o `#{animal.number}`).
+    3. Fila de **Raza** con icono genético `Dna` y composición de pureza.
+    4. Fila de **Finca** con icono `Building2` del predio asignado.
+    5. Fila de **Edad** con icono `Calendar` y formato legible.
+    6. Fila inferior con **Peso** (`Scale`) y botón de **Ordeño** directo para hembras.
+- **Limpieza de Filtro de Búsqueda**:
+  - Removido el botón redundante `+ Nueva Finca` del panel de búsqueda de fincas.
+- **Botón Flotante (FAB) Simplificado**:
+  - Se eliminaron del FAB las acciones migradas al menú hamburguesa (Cerrar Sesión, Respaldo Forzado, Nueva Finca), manteniendo acceso rápido a "Nuevo Registro" y "Vacunación por Lotes".
+
+---
+
 ## [1.1.0-features] - 2026-09-10
 
 ### Agregado
