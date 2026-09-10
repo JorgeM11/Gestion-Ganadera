@@ -32,6 +32,7 @@ import FarmModal from '@/components/inventario/FarmModal';
 import MilkingModal from '@/components/inventario/MilkingModal';
 import NavigationDrawer from '@/components/inventario/NavigationDrawer';
 import AnimalCardSkeleton from '@/components/inventario/AnimalCardSkeleton';
+import Toast from '@/components/ui/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForceResync } from '@/hooks/useForceResync';
 import { runFullSync } from '@/lib/syncUtils';
@@ -124,6 +125,13 @@ export default function InventarioPage() {
   const [isFarmModalOpen, setIsFarmModalOpen] = useState(false);
   const [isQuickMilkingOpen, setIsQuickMilkingOpen] = useState(false);
   const [milkingAnimal, setMilkingAnimal] = useState(null);
+
+  // --- ESTADO PARA NOTIFICACIONES DE CONFIRMACIÓN (TOAST) ---
+  const [toast, setToast] = useState(null);
+
+  const showToast = (title, message, type = 'success') => {
+    setToast({ id: Date.now(), title, message, type });
+  };
 
   const farms = useLiveQuery(() => db.farms.filter(f => !f.deleted_at).toArray()) || [];
   const farmMap = useMemo(() => {
@@ -918,6 +926,12 @@ export default function InventarioPage() {
       <FarmModal
         isOpen={isFarmModalOpen}
         onClose={() => setIsFarmModalOpen(false)}
+        onFarmCreated={(farm) => {
+          showToast('¡Finca creada con éxito!', `La finca "${farm.name}" fue registrada correctamente.`);
+        }}
+        onFarmUpdated={(farm) => {
+          showToast('¡Finca actualizada con éxito!', `Los cambios en "${farm.name}" fueron guardados.`);
+        }}
       />
 
       {/* MODAL REGISTRO DE ORDEÑO (RÁPIDO DESDE SIDEBAR O DIRECTO DESDE CARD) */}
@@ -928,7 +942,17 @@ export default function InventarioPage() {
           setMilkingAnimal(null);
           setIsQuickMilkingOpen(false);
         }}
+        onRecordCreated={(record, cow) => {
+          const cowLabel = cow?.number ? `#${cow.number}` : (milkingAnimal?.number ? `#${milkingAnimal.number}` : 'la vaca');
+          showToast(
+            '¡Ordeño registrado con éxito!',
+            `Se registraron ${record.liters} Lts de leche para ${cowLabel} (${record.shift || 'Turno'}).`
+          );
+        }}
       />
+
+      {/* NOTIFICACIÓN TOAST FLOTANTE */}
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </main>
   );
 }

@@ -9,8 +9,14 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 ## [1.2.0-ui-inventario] - 2026-09-10
 
 ### Agregado
-- **Menú Lateral Hamburguesa (Navigation Drawer)**:
-  - Componente [`NavigationDrawer.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/NavigationDrawer.jsx) con animaciones fluidas (`framer-motion`), fondo difuminado y diseño responsive.
+- **Animaciones Suaves de Apertura y Cierre en Modales**:
+  - En [`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx) y [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx), se encapsuló la renderización condicional con `<AnimatePresence>` y `motion.div`, garantizando transiciones elásticas suaves y desvanecimiento de fondo tanto al abrir como al cerrar los modales.
+- **Sistema de Notificaciones de Confirmación (Toast)**:
+  - Creación del componente [`Toast.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/Toast.jsx) con auto-cierre tras 4 segundos, icono `CheckCircle2` y animaciones fluidas con `framer-motion`.
+  - Disparadores de confirmación conectados para:
+    - Registro de nueva finca.
+    - Actualización/edición de finca existente.
+    - Registro rápido de ordeño diario.
   - Opciones integradas:
     1. **Inventario**: Navegación y estado activo.
     2. **Fincas**: Abre el gestor modal de fincas con contador dinámico.
