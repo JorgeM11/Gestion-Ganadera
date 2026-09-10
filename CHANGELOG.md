@@ -11,12 +11,15 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 ### Agregado
 - **Animaciones Suaves de Apertura y Cierre en Modales**:
   - En [`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx) y [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx), se encapsuló la renderización condicional con `<AnimatePresence>` y `motion.div`, garantizando transiciones elásticas suaves y desvanecimiento de fondo tanto al abrir como al cerrar los modales.
-- **Sistema de Notificaciones de Confirmación (Toast)**:
-  - Creación del componente [`Toast.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/Toast.jsx) con auto-cierre tras 4 segundos, icono `CheckCircle2` y animaciones fluidas con `framer-motion`.
-  - Disparadores de confirmación conectados para:
-    - Registro de nueva finca.
-    - Actualización/edición de finca existente.
-    - Registro rápido de ordeño diario.
+- **Mejoras en Selectores Flotantes y Modal de Ordeño**:
+  - En [`CustomSelect.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/CustomSelect.jsx):
+    - El menú desplegable ahora es **flotante absoluto (`absolute`)**, evitando que al abrirse expanda o deforme la altura del modal.
+    - Animaciones suaves de apertura y cierre con `AnimatePresence` y `motion.div`.
+    - Soporte para buscador interno (`searchable={true}`) y cierre automático al hacer clic fuera del componente.
+  - En [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx):
+    - El selector de vaca ahora incluye buscador en tiempo real para encontrar rápidamente animales por código o raza.
+    - El input de fecha de ordeño ahora tiene el **mismo diseño, bordes, padding y tipografía** que los demás inputs del formulario.
+    - Cierre suave de selects con transiciones fluidas.
   - Opciones integradas:
     1. **Inventario**: Navegación y estado activo.
     2. **Fincas**: Abre el gestor modal de fincas con contador dinámico.

@@ -5,7 +5,6 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { createMilkingRecord } from '@/lib/milkingUtils';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { DateInput } from '@/components/ui/DateInput';
 
 export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated }) {
   const [selectedAnimalId, setSelectedAnimalId] = useState(animal?.id || '');
@@ -134,6 +133,8 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
                     }))}
                     placeholder="Selecciona una vaca..."
                     bgClass="bg-neutral-50"
+                    searchable={true}
+                    searchPlaceholder="Buscar vaca por código o raza..."
                   />
                 </div>
               )}
@@ -142,9 +143,12 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
                 <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 block">
                   Fecha de Ordeño *
                 </label>
-                <DateInput
+                <input
+                  type="date"
                   value={date}
-                  onChange={setDate}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-[#1B4820]/20 text-neutral-800 cursor-pointer"
+                  required
                 />
               </div>
 
