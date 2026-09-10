@@ -12,6 +12,14 @@ import PerfilTacto from './pages/PerfilTacto';
 import PerfilTratamiento from './pages/PerfilTratamiento';
 import TratamientoLote from './pages/TratamientoLote';
 
+function ProtectedRoute({ children }) {
+  const userId = localStorage.getItem('ganadera_user_id');
+  if (!userId) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -22,16 +30,18 @@ export default function App() {
         {/* Redirección por defecto: Si entras a la raíz, vas al Login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Rutas de la aplicación */}
+        {/* Rutas públicas */}
         <Route path="/login" element={<Login />} />
-        <Route path="/inventario" element={<Inventario />} />
-        <Route path="/inventario/nuevo" element={<NuevoAnimal />} />
-        <Route path="/inventario/perfil" element={<PerfilAnimal />} />
-        <Route path="/inventario/perfil/evento" element={<PerfilEvento />} />
-        <Route path="/inventario/perfil/servicio" element={<PerfilServicio />} />
-        <Route path="/inventario/perfil/tacto" element={<PerfilTacto />} />
-        <Route path="/inventario/perfil/tratamiento" element={<PerfilTratamiento />} />
-        <Route path="/inventario/tratamiento-lote" element={<TratamientoLote />} />
+
+        {/* Rutas protegidas */}
+        <Route path="/inventario" element={<ProtectedRoute><Inventario /></ProtectedRoute>} />
+        <Route path="/inventario/nuevo" element={<ProtectedRoute><NuevoAnimal /></ProtectedRoute>} />
+        <Route path="/inventario/perfil" element={<ProtectedRoute><PerfilAnimal /></ProtectedRoute>} />
+        <Route path="/inventario/perfil/evento" element={<ProtectedRoute><PerfilEvento /></ProtectedRoute>} />
+        <Route path="/inventario/perfil/servicio" element={<ProtectedRoute><PerfilServicio /></ProtectedRoute>} />
+        <Route path="/inventario/perfil/tacto" element={<ProtectedRoute><PerfilTacto /></ProtectedRoute>} />
+        <Route path="/inventario/perfil/tratamiento" element={<ProtectedRoute><PerfilTratamiento /></ProtectedRoute>} />
+        <Route path="/inventario/tratamiento-lote" element={<ProtectedRoute><TratamientoLote /></ProtectedRoute>} />
 
         {/* Ruta 404: Por seguridad, redirigimos al login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
