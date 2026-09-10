@@ -70,40 +70,37 @@
   --color-outline-variant: #c3c8be;
 }
 
-/* ============================================================
-   BASE STYLES
-   ============================================================ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+  html {
+    height: 100%;
+  }
 
-html {
-  height: 100%;
-}
+  body {
+    min-height: 100%;
+    background-color: var(--color-surface-container-low);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+  }
 
-body {
-  min-height: 100%;
-  background-color: var(--color-surface-container-low);
-  color: var(--color-on-surface);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  margin: 0;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-  color: var(--color-on-surface);
-  line-height: 1.2;
-  margin: 0;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    line-height: 1.2;
+    margin: 0;
+  }
 }
 
 /* ============================================================

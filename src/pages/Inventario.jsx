@@ -512,7 +512,7 @@ export default function InventarioPage() {
                 className="p-2.5 rounded-2xl text-[#1B4820] md:text-white hover:bg-[#1B4820]/10 md:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
                 title="Abrir menú de navegación"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-6 h-6 text-[#1B4820] md:text-white" />
               </button>
               <h1 className="text-xl md:text-3xl font-black text-[#1B4820] md:text-white tracking-tight whitespace-nowrap">
                 Inventario

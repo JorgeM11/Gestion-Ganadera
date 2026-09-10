@@ -28,6 +28,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
   - Reemplazado el enlace de texto subrayado por un botón interactivo estructurado con icono `X`, fondo blanco, borde y sombreado.
 - **Estilo de Encabezado Inventario**:
   - Configuración explícita de color de texto para "Inventario" y el botón de hamburguesa: verde bosque (`#1B4820`) en dispositivos móviles y blanco nítido (`#FFFFFF`) en pantallas de escritorio.
+  - Corrección de conflicto CSS global en [`src/index.css`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/index.css) donde una regla sin capa sobreescribía el color del elemento `h1` forzándolo a oscuro/negro (`var(--color-on-surface)`). Se encapsuló en `@layer base` para permitir la aplicación correcta de las clases de utilidad de Tailwind.
 
 ### Modificado
 - **Reglas de Diseño Globales**:
