@@ -4,6 +4,26 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.5-ui-health-tab-modernization] - 2026-09-11
+
+### Agregado y Modificado
+- **Modernización Integral del Carnet de Salud ([`HealthTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/HealthTab.jsx))**:
+  - **Encabezado y Métricas Sanitarias Ejecutivas**:
+    - Reemplazada la tarjeta redundante de imagen y peso por un encabezado institucional alineado con el perfil de animal (`ShieldPlus`) y un panel de control con métricas en tiempo real: total de tratamientos aplicados, fecha y nombre de la última aplicación.
+  - **Filtros Interactivos por Categoría Médica**:
+    - Filtros dinámicos en píldoras con badges numéricos (`Todos`, `Vacunas`, `Desparasitantes`, `Vitaminas`, `Antibióticos`) e iconografía vectorial especializada (`Syringe`, `TbMedicineSyrup`, `Pill`, `Stethoscope`), permitiendo filtrar instantáneamente el historial clínico.
+  - **Tarjetas de Tratamiento Modernas y Funcionales**:
+    - Tarjetas interactivas con badges temáticos, fechas formateadas, visualización de dosis en ml, y acciones directas de edición rápida y eliminación segura.
+    - Modal de confirmación de eliminación ([`ConfirmDialog`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/ConfirmDialog.jsx)) sincronizado con la base de datos local Dexie y la cola offline.
+  - **Coherencia en Botones Flotantes (FABs) para Móvil y Computadora**:
+    - **Móvil (`md:hidden`)**: Botón flotante píldora en `bottom-20 right-4 z-30` con micro-física elástica rápida (`stiffness: 450, damping: 30, mass: 0.6`), icono `Plus` y texto *Tratamiento*.
+    - **Escritorio (`hidden md:flex`)**: Botón circular flotante `w-14 h-14` en `bottom-8 right-8 z-30` con animación de rotación en hover para registrar tratamientos de inmediato.
+    - Ambos botones abren un [`BottomSheet`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/BottomSheet.jsx) modal integrado con [`HealthForm`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/HealthForm.jsx) sin necesidad de abandonar la vista ni recargar la ficha del animal.
+  - **Estado Vacío Amigable y Elegante**:
+    - Ilustración vectorial con icono `ShieldCheck` y llamado a la acción directo para registrar el primer tratamiento del animal.
+
+---
+
 ## [1.3.4-form-female-weaning-scrotal-hide] - 2026-09-11
 
 ### Agregado y Modificado
