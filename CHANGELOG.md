@@ -4,6 +4,16 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.4-form-female-weaning-scrotal-hide] - 2026-09-11
+
+### Agregado y Modificado
+- **Ocultamiento Condicional de Circunferencia Escrotal al Destete ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - En el acordeón de *Evento: Destete* del formulario de registro y edición de animal, el campo **Circ. Escrotal al Destete (CM)** ahora se oculta de forma automática si el sexo seleccionado es **Hembra**.
+  - Se añadió limpieza reactiva (`useEffect`) que restablece a `null` el valor de `sc_at_weaning` si el usuario cambia el sexo a Hembra.
+  - Se blindó la persistencia en `handleSave` para garantizar que nunca se almacene circunferencia escrotal en animales de sexo Hembra al registrar eventos de destete.
+
+---
+
 ## [1.3.3-ui-fast-snappy-tab-animations] - 2026-09-11
 
 ### Agregado y Modificado

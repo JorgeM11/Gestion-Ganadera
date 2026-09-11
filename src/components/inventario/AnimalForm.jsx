@@ -245,6 +245,13 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
     setGeneticSuggestion(null); // Desaparece inmediatamente la recomendación
   };
 
+  // Si el animal es hembra, limpiar circunferencia escrotal al destete
+  useEffect(() => {
+    if (selectedSex === 'Hembra') {
+      setValue('sc_at_weaning', null);
+    }
+  }, [selectedSex, setValue]);
+
   // --- CARGA DE DATOS AL EDITAR (FASE 3 & MEMORIA) ---
   useEffect(() => {
     const loadExistingEvents = async () => {
@@ -541,7 +548,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
             event_date: data.weaning_date,
             weight_kg: data.weaning_weight_kg || null,
             mother_weight_kg: data.mother_weight_at_weaning || null,
-            scrotal_circumference_cm: data.sc_at_weaning || null,
+            scrotal_circumference_cm: data.sex === 'Hembra' ? null : (data.sc_at_weaning || null),
             observations: data.weaning_observations || null,
             photo_path: weaningImg.url,
             photo_blob: weaningImg.blob,
@@ -1071,10 +1078,12 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
                     <input type="number" step="any" {...register('weaning_weight_kg')} placeholder="Ej: 180" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
                   </div>
 
-                  <div>
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Circ. Escrotal al Destete (CM)</label>
-                    <input type="number" step="any" {...register('sc_at_weaning')} placeholder="Ej: 20" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-                  </div>
+                  {selectedSex !== 'Hembra' && (
+                    <div>
+                      <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Circ. Escrotal al Destete (CM)</label>
+                      <input type="number" step="any" {...register('sc_at_weaning')} placeholder="Ej: 20" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                    </div>
+                  )}
 
                   <div>
                     <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Madre al Destete (KG)</label>
