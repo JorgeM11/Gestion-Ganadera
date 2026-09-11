@@ -185,7 +185,7 @@ export default function EvolutionTab({ animal }) {
                         <DataBox icon={Ruler} label="Circ. Escrotal" value={`${event.scrotal_circumference_cm} cm`} />
                       )}
                       {event.navel_length && (
-                        <DataBox icon={Ruler} label="Largo Ombligo" value={`Escala ${event.navel_length}`} />
+                        <DataBox icon={Ruler} label="Largo Ombligo" value={`${event.navel_length}`} />
                       )}
                     </div>
 
