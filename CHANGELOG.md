@@ -4,6 +4,35 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.3-ui-animal-form] - 2026-09-11
+
+### Agregado y Modificado
+- **Rediseño Integral del Formulario de Registro y Edición de Animales**:
+  - **Ubicación de Raza y Genética**: La sección de "Raza y Genética" ahora se sitúa **debajo** de la selección de progenitores (Genealogía: Padre y Madre), respetando la relación causa-efecto del linaje.
+  - **Cálculo y Desaparición de Recomendación Genética**:
+    - Al seleccionar padre y madre con datos raciales, el sistema calcula automáticamente la herencia genética sugerida.
+    - Al hacer clic en **"Aplicar"** (o descartar mediante `X`), la sugerencia **desaparece inmediatamente** con una transición fluida soportada por `AnimatePresence`.
+  - **Gestión Especial para Animales Mestizos**:
+    - Si la raza es "Mestizo", se elimina el slider y selector numérico de pureza individual. En su lugar se despliega la composición proporcional exacta del cruce (`breed_composition`) heredada de los padres (ej. *50% Brahman · 50% Holstein*).
+    - Para razas puras, se conserva el slider y selector de pureza genética interactivo.
+  - **Selectores de Genealogía Fluidos (`GenealogySelector.jsx`)**:
+    - Menús desplegables con animación elástica de entrada y salida (`AnimatePresence` + `motion.div`).
+    - Búsqueda en tiempo real por número de arete/código, con chips de raza y color en cada opción del catálogo.
+    - Botón de borrado rápido (`X`) y `cursor-pointer` en todos los disparadores.
+  - **Animación del Modal de Progenitores (`BottomSheet.jsx`)**:
+    - Reconfiguración de físicas de animación a resorte (`spring` con mayor amortiguación y elasticidad).
+    - Despliegue optimizado tanto en versión Bottom Sheet móvil como en modal centrado de escritorio.
+    - Fondo con desenfoque de cristal (`backdrop-blur-xs`) y soporte de z-index anidado.
+  - **Acordeones Dinámicos para Secciones Extensas (Nacimiento, Destete y Servicio)**:
+    - Secciones largas ahora son colapsables con animaciones suaves de altura y desvanecimiento.
+    - Badges de estado dinámico ("Con datos" / "Opcional" / "Asignado") para inspección rápida sin saturar la pantalla.
+    - Layout responsivo optimizado (`grid grid-cols-1 sm:grid-cols-2 gap-4`) para máxima comodidad en tablets y pantallas grandes.
+  - **Interfaz Profesional 100% Vectorial (Cero Emojis)**:
+    - Sustitución de emojis por iconografía SVG estructurada de `lucide-react` (`Dna`, `Baby`, `Milk`, `Scale`, `Building2`, `Sparkles`, `Plus`, `X`, `Save`).
+    - Adición estricta de `cursor-pointer` en todos los botones, controles, headers y selectores.
+
+---
+
 ## [1.2.2-ui-batch-mode] - 2026-09-11
 
 ### Modificado

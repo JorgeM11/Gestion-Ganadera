@@ -825,7 +825,7 @@ export default function InventarioPage() {
             className="fixed bottom-0 left-0 w-full bg-white border-t border-neutral-200 z-[60] px-5 sm:px-6 py-4 sm:py-5 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-[2.5rem]"
           >
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-              <div className="flex flex-col text-left items-start pl-2 sm:pl-0">
+              <div className="flex flex-col text-left items-start pl-4 sm:pl-0">
                 <span className="text-2xl font-black text-black leading-none">{selectedAnimalIds.size}</span>
                 <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-widest mt-1">Animales Seleccionados</span>
               </div>

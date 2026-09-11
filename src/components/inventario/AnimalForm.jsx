@@ -2,7 +2,12 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Camera, Save, X, ChevronUp, ChevronDown, Trash2, Plus, CheckCircle, TriangleAlert, Building2, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Camera, Save, X, ChevronUp, ChevronDown, Trash2, Plus, 
+  CheckCircle, TriangleAlert, Building2, Sparkles, Dna, 
+  Baby, Milk, Scale, Info 
+} from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db } from '@/lib/db';
@@ -142,6 +147,17 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
   const selectedFarmId = watch('farm_id');
   const selectedBreed = watch('breed');
   const selectedPurity = watch('purity_percentage');
+  const breedComposition = watch('breed_composition');
+
+  const birthDate = watch('birth_date');
+  const birthWeight = watch('birth_weight_kg');
+  const weaningDate = watch('weaning_date');
+  const weaningWeight = watch('weaning_weight_kg');
+  const originServiceId = watch('origin_service_id');
+
+  const hasBirthData = Boolean(birthDate || birthWeight || images.birth.preview);
+  const hasWeaningData = Boolean(weaningDate || weaningWeight || images.weaning.preview);
+  const hasServiceData = Boolean(originServiceId);
 
   // Cálculo genético automático al cambiar de padres
   useEffect(() => {
@@ -167,6 +183,14 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
     };
     computeGenetics();
   }, [fatherId, motherId, initialValues, setValue]);
+
+  const handleApplySuggestion = () => {
+    if (!geneticSuggestion) return;
+    setValue('breed', geneticSuggestion.breed, { shouldDirty: true });
+    setValue('purity_percentage', geneticSuggestion.purity_percentage, { shouldDirty: true });
+    setValue('breed_composition', geneticSuggestion.breed_composition, { shouldDirty: true });
+    setGeneticSuggestion(null); // Desaparece inmediatamente la recomendación
+  };
 
   // --- CARGA DE DATOS AL EDITAR (FASE 3 & MEMORIA) ---
   useEffect(() => {
@@ -252,8 +276,6 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
   const toggleAccordion = (section) => {
     setActiveAccordions(prev => ({ ...prev, [section]: !prev[section] }));
   };
-
-  const originServiceId = watch('origin_service_id');
 
   const motherServicesOptions = useMemo(() => {
     if (!motherServices) return [];
@@ -578,83 +600,256 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
         </div>
       </section>
 
-      {/* 2. RAZA Y CARACTERÍSTICAS GENÉTICAS */}
-      <section className="bg-amber-50/40 rounded-3xl p-5 mb-4 border border-amber-100/60 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full bg-amber-600"></div>
-            <h3 className="text-base font-bold text-neutral-900">Raza y Genética</h3>
+      {/* 2. GENEALOGÍA */}
+      <section className="bg-neutral-100/60 rounded-3xl p-5 mb-4 border border-neutral-200/70 shadow-2xs space-y-4">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-1.5 h-6 rounded-full bg-[#8C6746]"></div>
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-[#1B4820]">Genealogía</h3>
+            <p className="text-[11px] text-neutral-400 font-medium">Selección de progenitores (Padre y Madre)</p>
           </div>
-          <span className="text-xs font-bold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-full">
-            {formatGeneticsLabel(selectedBreed, selectedPurity)}
+        </div>
+
+        <div>
+          <GenealogySelector label="Padre (Toro)" sex="Macho" value={fatherId} onChange={(id) => setValue('father_id', id)} onCreateNew={(sex) => onOpenModal && onOpenModal(sex, (id) => setValue('father_id', id))} />
+        </div>
+
+        <div>
+          <GenealogySelector label="Madre (Vaca)" sex="Hembra" value={motherId} onChange={(id) => setValue('mother_id', id)} onCreateNew={(sex) => onOpenModal && onOpenModal(sex, (id) => setValue('mother_id', id))} />
+        </div>
+      </section>
+
+      {/* ACORDEÓN: SERVICIO DE ORIGEN */}
+      {motherId && (
+        <div className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-200/70 shadow-2xs">
+          <div 
+            className="flex items-center justify-between cursor-pointer select-none" 
+            onClick={() => toggleAccordion('service')}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 rounded-full bg-blue-500"></div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-[#1B4820]">Servicio de Origen</h3>
+                <p className="text-[11px] text-neutral-400 font-medium">Inseminación o monta de la madre</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                hasServiceData 
+                  ? 'bg-blue-100 text-blue-800 font-black' 
+                  : 'bg-neutral-200/70 text-neutral-500'
+              }`}>
+                {hasServiceData ? 'Asignado' : 'Opcional'}
+              </span>
+              <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform duration-200 ${activeAccordions.service ? 'rotate-180 text-[#1B4820]' : ''}`} />
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {activeAccordions.service && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.24, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="pt-5 space-y-4">
+                  {motherServices === undefined ? (
+                    <p className="text-sm text-neutral-500">Cargando servicios...</p>
+                  ) : showQuickService ? (
+                    <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
+                      <h4 className="text-[10px] font-black uppercase text-[#1B4820] tracking-widest border-b border-neutral-100 pb-2">Nuevo Servicio Rápido</h4>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Fecha del Servicio</label>
+                        <DateInput value={quickServiceData.date} onChange={e => setQuickServiceData(d => ({ ...d, date: e.target.value }))} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Tipo de Concepción</label>
+                        <CustomSelect
+                          value={quickServiceData.type}
+                          onChange={val => setQuickServiceData(d => ({ ...d, type: val }))}
+                          options={serviceTypeOptions}
+                          bgClass="bg-neutral-50"
+                        />
+                      </div>
+
+                      <div className="flex gap-3 pt-2">
+                        <button type="button" disabled={isSavingQuickService} onClick={() => setShowQuickService(false)} className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-xs font-bold py-3.5 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed">Cancelar</button>
+                        <button type="button" disabled={isSavingQuickService} onClick={handleQuickServiceCreate} className="flex-1 bg-[#1B4820] hover:bg-[#0F2912] text-white text-xs font-bold py-3.5 rounded-xl disabled:opacity-50 transition-all shadow-sm cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                          {isSavingQuickService ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              GUARDANDO...
+                            </>
+                          ) : 'Guardar y Usar'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {motherServices.length === 0 ? (
+                        <div className="text-center bg-white border border-neutral-100 p-4 rounded-2xl">
+                          <p className="text-xs text-neutral-500 mb-2 font-medium">Esta madre no tiene servicios registrados.</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Seleccionar Servicio</label>
+                          <CustomSelect
+                            value={originServiceId}
+                            onChange={val => setValue('origin_service_id', val)}
+                            options={motherServicesOptions}
+                            placeholder="Selecciona el servicio origen..."
+                          />
+                        </div>
+                      )}
+
+                      <button type="button" onClick={() => setShowQuickService(true)} className="w-full flex items-center justify-center gap-2 bg-white border border-dashed border-neutral-300 hover:border-[#1B4820] hover:text-[#1B4820] hover:bg-emerald-50 text-neutral-700 font-bold py-3.5 rounded-xl transition-all text-xs cursor-pointer shadow-2xs">
+                        <Plus className="w-4 h-4 text-[#1B4820]" />
+                        REGISTRAR NUEVO SERVICIO
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* 3. RAZA Y CARACTERÍSTICAS GENÉTICAS (DEBAJO DE GENEALOGÍA) */}
+      <section className="bg-amber-50/40 rounded-3xl p-5 mb-4 border border-amber-200/60 shadow-2xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-1.5 h-6 rounded-full bg-amber-600"></div>
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-neutral-900 flex items-center gap-1.5">
+                <Dna className="w-4 h-4 text-amber-600" />
+                Raza y Genética
+              </h3>
+              <p className="text-[11px] text-neutral-500 font-medium">Clasificación racial y pureza</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-amber-800 bg-amber-100/90 px-3 py-1 rounded-full border border-amber-200">
+            {formatGeneticsLabel(selectedBreed, selectedPurity, breedComposition)}
           </span>
         </div>
 
-        {/* Banner de sugerencia genética automática */}
-        {geneticSuggestion && (
-          <div className="bg-white border border-amber-200 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
-              <div>
-                <p className="text-[11px] font-bold text-amber-900 uppercase">Cálculo Genético Heredado</p>
-                <p className="text-xs text-neutral-600 font-medium">{geneticSuggestion.label}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setValue('breed', geneticSuggestion.breed);
-                setValue('purity_percentage', geneticSuggestion.purity_percentage);
-                setValue('breed_composition', geneticSuggestion.breed_composition);
-              }}
-              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer"
+        {/* Banner de sugerencia genética automática con AnimatePresence (Desaparece al Aplicar) */}
+        <AnimatePresence>
+          {geneticSuggestion && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, y: -6 }}
+              animate={{ opacity: 1, height: 'auto', y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="overflow-hidden"
             >
-              Aplicar
-            </button>
-          </div>
-        )}
+              <div className="bg-white border border-amber-300/80 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-2 rounded-xl bg-amber-100 text-amber-700 shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Cálculo Genético Heredado</p>
+                    <p className="text-xs text-neutral-700 font-bold truncate">{geneticSuggestion.label}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleApplySuggestion}
+                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-2xs"
+                  >
+                    Aplicar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGeneticSuggestion(null)}
+                    className="p-1.5 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors cursor-pointer"
+                    title="Cerrar sugerencia"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Raza Principal</label>
             <CustomSelect
               value={selectedBreed || 'Mestizo'}
-              onChange={(val) => setValue('breed', val)}
+              onChange={(val) => {
+                setValue('breed', val, { shouldDirty: true });
+                if (val === 'Mestizo') {
+                  setValue('purity_percentage', 50);
+                }
+              }}
               options={POPULAR_BREEDS.map(b => ({ value: b, label: b }))}
               bgClass="bg-white"
+              searchable={true}
+              searchPlaceholder="Buscar raza..."
             />
           </div>
 
-          <div>
-            <div className="flex justify-between items-center mb-1 ml-1">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase">Pureza Genética</label>
-              <span className="text-xs font-bold text-amber-900">{selectedPurity || 50}%</span>
+          {/* Si es Mestizo: ocultar porcentaje numérico y slider */}
+          {selectedBreed === 'Mestizo' ? (
+            <div className="bg-white/70 border border-amber-200/60 rounded-2xl p-3.5 flex flex-col justify-center">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-1">
+                Composición del Cruce
+              </span>
+              {breedComposition && typeof breedComposition === 'object' && Object.keys(breedComposition).length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 mt-0.5">
+                  {Object.entries(breedComposition).map(([raza, pct]) => (
+                    <span key={raza} className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 px-2.5 py-1 rounded-xl text-xs font-bold border border-amber-200/70">
+                      <span>{raza}:</span>
+                      <span className="font-black text-amber-700">{pct}%</span>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-neutral-500 font-medium italic">
+                  Cruce mestizo general (las proporciones se definen por los progenitores)
+                </p>
+              )}
             </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={selectedPurity ?? 50}
-                onChange={(e) => setValue('purity_percentage', Number(e.target.value))}
-                className="flex-1 accent-amber-600 h-2 bg-neutral-200 rounded-lg cursor-pointer"
-              />
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={selectedPurity ?? 50}
-                onChange={(e) => setValue('purity_percentage', Number(e.target.value))}
-                className="w-16 bg-white border border-neutral-200 rounded-xl px-2 py-2 text-center text-xs font-bold text-neutral-800"
-              />
+          ) : (
+            <div>
+              <div className="flex justify-between items-center mb-1 ml-1">
+                <label className="text-[10px] font-bold text-neutral-400 uppercase">Pureza Genética</label>
+                <span className="text-xs font-bold text-amber-900">{selectedPurity ?? 100}%</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={selectedPurity ?? 100}
+                  onChange={(e) => setValue('purity_percentage', Number(e.target.value))}
+                  className="flex-1 accent-amber-600 h-2 bg-neutral-200 rounded-lg cursor-pointer"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={selectedPurity ?? 100}
+                  onChange={(e) => setValue('purity_percentage', Number(e.target.value))}
+                  className="w-16 bg-white border border-neutral-200 rounded-xl px-2 py-2 text-center text-xs font-bold text-neutral-800"
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* ESTADO Y DISPONIBILIDAD */}
-      <section className="bg-white rounded-3xl p-5 mb-4 border border-neutral-100 shadow-sm space-y-4">
+      {/* 4. ESTADO Y DISPONIBILIDAD */}
+      <section className="bg-white rounded-3xl p-5 mb-4 border border-neutral-200/70 shadow-2xs space-y-4">
         <div>
           <CustomSelect
             label="Estado del Animal"
@@ -679,196 +874,165 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
         )}
       </section>
 
-      {/* GENEALOGÍA */}
-      <section className="bg-neutral-100/50 rounded-3xl p-5 mb-4 border border-neutral-100 space-y-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-1 h-5 rounded-full bg-[#8C6746]"></div>
-          <h3 className="text-lg font-bold text-[#1B4820]">Genealogía</h3>
-        </div>
-
-        <div>
-          <GenealogySelector label="Padre (Toro)" sex="Macho" value={fatherId} onChange={(id) => setValue('father_id', id)} onCreateNew={(sex) => onOpenModal && onOpenModal(sex, (id) => setValue('father_id', id))} />
-        </div>
-
-        <div>
-          <GenealogySelector label="Madre (Vaca)" sex="Hembra" value={motherId} onChange={(id) => setValue('mother_id', id)} onCreateNew={(sex) => onOpenModal && onOpenModal(sex, (id) => setValue('mother_id', id))} />
-        </div>
-      </section>
-
-      {/* ACORDEÓN: SERVICIO DE ORIGEN */}
-      {motherId && (
-        <div className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-100">
-          <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion('service')}>
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-5 rounded-full bg-blue-500"></div>
-              <h3 className="text-lg font-bold text-[#1B4820]">Servicio de Origen</h3>
+      {/* 5. ACORDEÓN: EVENTO NACIMIENTO */}
+      <div className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-200/70 shadow-2xs">
+        <div 
+          className="flex items-center justify-between cursor-pointer select-none" 
+          onClick={() => toggleAccordion('birth')}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-6 rounded-full bg-emerald-600"></div>
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-[#1B4820] flex items-center gap-1.5">
+                <Baby className="w-4 h-4 text-emerald-600" />
+                Evento: Nacimiento
+              </h3>
+              <p className="text-[11px] text-neutral-400 font-medium">Pesaje inicial y datos del parto</p>
             </div>
-            {activeAccordions.service ? <ChevronUp className="w-5 h-5 text-neutral-500" /> : <ChevronDown className="w-5 h-5 text-neutral-500" />}
           </div>
+          <div className="flex items-center gap-2.5">
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+              hasBirthData 
+                ? 'bg-emerald-100 text-emerald-800 font-black' 
+                : 'bg-neutral-200/70 text-neutral-500'
+            }`}>
+              {hasBirthData ? 'Con datos' : 'Opcional'}
+            </span>
+            <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform duration-200 ${activeAccordions.birth ? 'rotate-180 text-[#1B4820]' : ''}`} />
+          </div>
+        </div>
 
-          <div className={`grid transition-all duration-300 ease-in-out ${activeAccordions.service ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-            <div className="overflow-hidden">
+        <AnimatePresence>
+          {activeAccordions.birth && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.24, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
               <div className="pt-5 space-y-4">
-                {motherServices === undefined ? (
-                  <p className="text-sm text-neutral-500">Cargando servicios...</p>
-                ) : showQuickService ? (
-                  <div className="bg-white p-4 rounded-2xl border border-neutral-200 shadow-sm space-y-4">
-                    <h4 className="text-[10px] font-black uppercase text-[#1B4820] tracking-widest border-b border-neutral-100 pb-2">Nuevo Servicio Rápido</h4>
+                <ImageUploader id="birth" label="Foto al Nacer" preview={images.birth.preview} onCapture={(e) => handleImageCapture(e, 'birth')} onRemove={() => removeImage('birth')} />
 
-                    <div>
-                      <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Fecha del Servicio</label>
-                      <DateInput value={quickServiceData.date} onChange={e => setQuickServiceData(d => ({ ...d, date: e.target.value }))} className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Tipo de Concepción</label>
-                      <CustomSelect
-                        value={quickServiceData.type}
-                        onChange={val => setQuickServiceData(d => ({ ...d, type: val }))}
-                        options={serviceTypeOptions}
-                        bgClass="bg-neutral-50"
-                      />
-                    </div>
-
-                    <div className="flex gap-3 pt-2">
-                      <button type="button" disabled={isSavingQuickService} onClick={() => setShowQuickService(false)} className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-xs font-bold py-3.5 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed">Cancelar</button>
-                      <button type="button" disabled={isSavingQuickService} onClick={handleQuickServiceCreate} className="flex-1 bg-[#1B4820] hover:bg-[#0F2912] text-white text-xs font-bold py-3.5 rounded-xl disabled:opacity-50 transition-all shadow-sm cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        {isSavingQuickService ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            GUARDANDO...
-                          </>
-                        ) : 'Guardar y Usar'}
-                      </button>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Fecha de Nacimiento</label>
+                    <DateInput {...register('birth_date')} className="w-full bg-white rounded-xl px-4 py-3 text-neutral-800 border border-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {motherServices.length === 0 ? (
-                      <div className="text-center bg-white border border-neutral-100 p-4 rounded-2xl">
-                        <p className="text-xs text-neutral-500 mb-2 font-medium">Esta madre no tiene servicios registrados.</p>
-                      </div>
-                    ) : (
-                      <div>
-                        <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Seleccionar Servicio</label>
-                        <CustomSelect
-                          value={originServiceId}
-                          onChange={val => setValue('origin_service_id', val)}
-                          options={motherServicesOptions}
-                          placeholder="Selecciona el servicio origen..."
-                        />
-                      </div>
-                    )}
 
-                    <button type="button" onClick={() => setShowQuickService(true)} className="w-full flex items-center justify-center gap-2 bg-neutral-50 border border-dashed border-neutral-300 hover:border-[#1B4820] hover:text-[#1B4820] hover:bg-emerald-50 text-neutral-600 font-bold py-3.5 rounded-xl transition-all text-xs cursor-pointer">
-                      <Plus className="w-4 h-4" />
-                      REGISTRAR NUEVO SERVICIO
-                    </button>
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Cría al Nacer (KG)</label>
+                    <input type="number" step="any" {...register('birth_weight_kg')} placeholder="Ej: 35" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* ACORDEÓN: NACIMIENTO */}
-      <div className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-100">
-        <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion('birth')}>
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-5 rounded-full bg-emerald-600"></div>
-            <h3 className="text-lg font-bold text-[#1B4820]">Evento: Nacimiento</h3>
-          </div>
-          {activeAccordions.birth ? <ChevronUp className="w-5 h-5 text-neutral-500" /> : <ChevronDown className="w-5 h-5 text-neutral-500" />}
-        </div>
-        <div className={`grid transition-all duration-300 ease-in-out ${activeAccordions.birth ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-          <div className="overflow-hidden">
-            <div className="pt-5 space-y-4">
-              <ImageUploader id="birth" label="Foto al Nacer" preview={images.birth.preview} onCapture={(e) => handleImageCapture(e, 'birth')} onRemove={() => removeImage('birth')} />
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Madre al Parto (KG)</label>
+                    <input type="number" step="any" {...register('mother_weight_at_birth')} placeholder="Ej: 450" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                  </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Fecha de Nacimiento</label>
-                <DateInput {...register('birth_date')} className="w-full bg-white rounded-xl px-4 py-3 text-neutral-800 border border-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Longitud del Ombligo (CM)</label>
+                    <input {...register('navel_length')} placeholder="Ej: 5" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                  </div>
+                </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso de la Cría al Nacer (KG)</label>
-                <input type="number" step="any" {...register('birth_weight_kg')} placeholder="Ej: 35" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Observaciones del Parto</label>
+                  <textarea {...register('birth_observations')} placeholder="Detalles u observaciones del parto..." rows={2} className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none resize-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                </div>
               </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Madre al Parto (KG)</label>
-                <input type="number" step="any" {...register('mother_weight_at_birth')} placeholder="Ej: 450" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Longitud del Ombligo (CM)</label>
-                <input {...register('navel_length')} placeholder="Ej: 5" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Observaciones del Parto</label>
-                <textarea {...register('birth_observations')} placeholder="Detalles u observaciones del parto..." rows={2} className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none resize-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* ACORDEÓN: DESTETE */}
-      <div className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-100">
-        <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion('weaning')}>
+      {/* 6. ACORDEÓN: EVENTO DESTETE */}
+      <div className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-200/70 shadow-2xs">
+        <div 
+          className="flex items-center justify-between cursor-pointer select-none" 
+          onClick={() => toggleAccordion('weaning')}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-1 h-5 rounded-full bg-amber-600"></div>
-            <h3 className="text-lg font-bold text-[#1B4820]">Evento: Destete</h3>
-          </div>
-          {activeAccordions.weaning ? <ChevronUp className="w-5 h-5 text-neutral-500" /> : <ChevronDown className="w-5 h-5 text-neutral-500" />}
-        </div>
-        <div className={`grid transition-all duration-300 ease-in-out ${activeAccordions.weaning ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-          <div className="overflow-hidden">
-            <div className="pt-5 space-y-4">
-              <ImageUploader id="weaning" label="Foto al Destete" preview={images.weaning.preview} onCapture={(e) => handleImageCapture(e, 'weaning')} onRemove={() => removeImage('weaning')} />
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Fecha de Destete</label>
-                <DateInput {...register('weaning_date')} className="w-full bg-white rounded-xl px-4 py-3 text-neutral-800 border border-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso al Destete (KG)</label>
-                <input type="number" step="any" {...register('weaning_weight_kg')} placeholder="Ej: 180" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Circ. Escrotal al Destete (CM)</label>
-                <input type="number" step="any" {...register('sc_at_weaning')} placeholder="Ej: 20" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Madre al Destete (KG)</label>
-                <input type="number" step="any" {...register('mother_weight_at_weaning')} placeholder="Ej: 420" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Observaciones del Destete</label>
-                <textarea {...register('weaning_observations')} placeholder="Detalles u observaciones del destete..." rows={2} className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none resize-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
-              </div>
+            <div className="w-1.5 h-6 rounded-full bg-amber-600"></div>
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-[#1B4820] flex items-center gap-1.5">
+                <Milk className="w-4 h-4 text-amber-600" />
+                Evento: Destete
+              </h3>
+              <p className="text-[11px] text-neutral-400 font-medium">Pesaje y evaluación al destetar</p>
             </div>
           </div>
+          <div className="flex items-center gap-2.5">
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+              hasWeaningData 
+                ? 'bg-amber-100 text-amber-800 font-black' 
+                : 'bg-neutral-200/70 text-neutral-500'
+            }`}>
+              {hasWeaningData ? 'Con datos' : 'Opcional'}
+            </span>
+            <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform duration-200 ${activeAccordions.weaning ? 'rotate-180 text-[#1B4820]' : ''}`} />
+          </div>
         </div>
+
+        <AnimatePresence>
+          {activeAccordions.weaning && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.24, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="pt-5 space-y-4">
+                <ImageUploader id="weaning" label="Foto al Destete" preview={images.weaning.preview} onCapture={(e) => handleImageCapture(e, 'weaning')} onRemove={() => removeImage('weaning')} />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Fecha de Destete</label>
+                    <DateInput {...register('weaning_date')} className="w-full bg-white rounded-xl px-4 py-3 text-neutral-800 border border-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso al Destete (KG)</label>
+                    <input type="number" step="any" {...register('weaning_weight_kg')} placeholder="Ej: 180" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Circ. Escrotal al Destete (CM)</label>
+                    <input type="number" step="any" {...register('sc_at_weaning')} placeholder="Ej: 20" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Madre al Destete (KG)</label>
+                    <input type="number" step="any" {...register('mother_weight_at_weaning')} placeholder="Ej: 420" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Observaciones del Destete</label>
+                  <textarea {...register('weaning_observations')} placeholder="Detalles u observaciones del destete..." rows={2} className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none resize-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* MEDIDAS ACTUALES */}
-      <section className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-100">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-1 h-5 rounded-full bg-[#1B4820]"></div>
-          <h3 className="text-lg font-bold text-[#1B4820]">Peso Actual</h3>
-        </div>
-        <div className="grid grid-cols-1 gap-4">
+      {/* 7. MEDIDAS ACTUALES */}
+      <section className="bg-neutral-50 rounded-3xl p-5 mb-4 border border-neutral-200/70 shadow-2xs">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-1.5 h-6 rounded-full bg-[#1B4820]"></div>
           <div>
-            <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Actual (KG)</label>
-            <input type="number" step="any" {...register('current_weight_kg')} placeholder="Ej: 250" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+            <h3 className="text-base sm:text-lg font-bold text-[#1B4820] flex items-center gap-1.5">
+              <Scale className="w-4 h-4 text-[#1B4820]" />
+              Peso Actual
+            </h3>
+            <p className="text-[11px] text-neutral-400 font-medium">Último pesaje del animal para control en inventario</p>
           </div>
+        </div>
+        <div>
+          <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Peso Actual (KG)</label>
+          <input type="number" step="any" {...register('current_weight_kg')} placeholder="Ej: 250" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-200 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all font-bold text-neutral-800 text-sm" />
         </div>
       </section>
 

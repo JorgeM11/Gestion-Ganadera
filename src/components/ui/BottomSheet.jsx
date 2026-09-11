@@ -12,7 +12,8 @@ export default function BottomSheet({
   onClose, 
   title, 
   description, 
-  children 
+  children,
+  style = {}
 }) {
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -38,31 +39,33 @@ export default function BottomSheet({
     };
   }, [isOpen]);
 
-  // Variantes para móvil (Bottom Sheet)
+  // Variantes para móvil (Bottom Sheet elástico y fluido)
   const mobileVariants = {
-    initial: { y: '100%', opacity: 1 },
+    initial: { y: '100%', opacity: 0.7 },
     animate: { y: 0, opacity: 1 },
-    exit: { y: '100%', opacity: 1 }
+    exit: { y: '100%', opacity: 0 }
   };
 
-  // Variantes para escritorio (Modal Centrado)
+  // Variantes para escritorio (Modal Centrado con zoom elástico suave)
   const desktopVariants = {
-    initial: { opacity: 0, scale: 0.9, y: '-45%', x: '-50%' },
+    initial: { opacity: 0, scale: 0.92, y: '-46%', x: '-50%' },
     animate: { opacity: 1, scale: 1, y: '-50%', x: '-50%' },
-    exit: { opacity: 0, scale: 0.95, y: '-45%', x: '-50%' }
+    exit: { opacity: 0, scale: 0.92, y: '-46%', x: '-50%' }
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay / Backdrop */}
+          {/* Overlay / Backdrop con difuminado suave */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeInOut' }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]"
+            style={{ zIndex: (style?.zIndex ? style.zIndex - 1 : 49) }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs cursor-pointer"
           />
 
           {/* Sheet/Modal Container */}
@@ -72,8 +75,8 @@ export default function BottomSheet({
             exit="exit"
             variants={isDesktop ? desktopVariants : mobileVariants}
             transition={isDesktop 
-              ? { type: 'spring', damping: 25, stiffness: 300 }
-              : { type: 'spring', damping: 25, stiffness: 200 }
+              ? { type: 'spring', damping: 26, stiffness: 320 }
+              : { type: 'spring', damping: 28, stiffness: 280 }
             }
             drag={!isDesktop ? "y" : false}
             dragConstraints={{ top: 0 }}
@@ -83,7 +86,8 @@ export default function BottomSheet({
                 onClose();
               }
             }}
-            className={`fixed z-50 flex flex-col bg-white shadow-2xl overflow-hidden
+            style={style}
+            className={`fixed flex flex-col bg-white shadow-2xl overflow-hidden
               ${isDesktop 
                 ? 'top-1/2 left-1/2 w-[95%] max-w-lg max-h-[85dvh] rounded-3xl' 
                 : 'inset-x-0 bottom-0 max-h-[92dvh] rounded-t-[2.5rem]'
@@ -91,24 +95,25 @@ export default function BottomSheet({
           >
             {/* Handle / Grip (Solo móvil) */}
             {!isDesktop && (
-              <div className="w-full flex justify-center py-4 cursor-grab active:cursor-grabbing">
+              <div className="w-full flex justify-center py-3.5 cursor-grab active:cursor-grabbing">
                 <div className="w-12 h-1.5 bg-neutral-200 rounded-full" />
               </div>
             )}
 
             {/* Header */}
-            <div className={`px-6 pt-4 sm:pt-6 pb-4 ${isDesktop ? 'border-b border-neutral-50' : ''}`}>
+            <div className={`px-6 pt-3 sm:pt-6 pb-4 ${isDesktop ? 'border-b border-neutral-100' : ''}`}>
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-xl font-bold text-neutral-900">{title}</h2>
                 <button 
+                  type="button"
                   onClick={onClose}
-                  className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5 text-neutral-500" />
                 </button>
               </div>
               {description && (
-                <p className="text-sm text-neutral-500">{description}</p>
+                <p className="text-xs text-neutral-500">{description}</p>
               )}
             </div>
 
