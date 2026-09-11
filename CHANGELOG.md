@@ -4,6 +4,15 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.2-ui-batch-mode] - 2026-09-11
+
+### Modificado
+- **Ajustes en Vacunación por Lotes**:
+  - **Simplificación del Título**: Eliminada la palabra redundante "Modo", pasando de "Modo Vacunación por Lotes" a **"Vacunación por Lotes"** en el banner flotante superior.
+  - **Alineación a la Izquierda en Móvil**: En la barra inferior de acción ([`Inventario.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Inventario.jsx)), el indicador y contador de animales seleccionados ahora se alinea a la izquierda (`items-start` y `text-left`) con padding optimizado (`px-4 sm:px-6`), eliminando el espacio en blanco vacío que quedaba en pantallas móviles y ofreciendo una lectura mucho más natural.
+
+---
+
 ## [1.2.1-sync-reconciliation] - 2026-09-10
 
 ### Corregido

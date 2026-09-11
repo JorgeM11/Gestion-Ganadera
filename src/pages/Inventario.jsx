@@ -579,7 +579,7 @@ export default function InventarioPage() {
               <div className="bg-white/20 p-2 rounded-xl">
                 <Syringe className="w-5 h-5 text-white" />
               </div>
-              <span className="text-sm font-black uppercase tracking-widest">Modo Vacunación por Lotes</span>
+              <span className="text-sm font-black uppercase tracking-widest">Vacunación por Lotes</span>
             </div>
             <button
               type="button"
@@ -822,10 +822,10 @@ export default function InventarioPage() {
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
-            className="fixed bottom-0 left-0 w-full bg-white border-t border-neutral-200 z-[60] px-6 py-5 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-[2.5rem]"
+            className="fixed bottom-0 left-0 w-full bg-white border-t border-neutral-200 z-[60] px-4 sm:px-6 py-4 sm:py-5 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-[2.5rem]"
           >
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex flex-col">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex flex-col text-left items-start">
                 <span className="text-2xl font-black text-black leading-none">{selectedAnimalIds.size}</span>
                 <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-widest mt-1">Animales Seleccionados</span>
               </div>
@@ -834,7 +834,7 @@ export default function InventarioPage() {
                 <button
                   type="button"
                   onClick={cancelBatchMode}
-                  className="flex-1 sm:flex-initial px-8 py-4 rounded-2xl bg-neutral-100 text-neutral-600 font-black text-xs uppercase tracking-widest hover:bg-neutral-200 transition-colors cursor-pointer"
+                  className="flex-1 sm:flex-initial px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-neutral-100 text-neutral-600 font-black text-xs uppercase tracking-widest hover:bg-neutral-200 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -842,7 +842,7 @@ export default function InventarioPage() {
                   type="button"
                   onClick={handleContinueBatch}
                   disabled={selectedAnimalIds.size === 0}
-                  className="flex-1 sm:flex-initial px-10 py-4 rounded-2xl bg-[#1B4820] text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-950 transition-all shadow-lg shadow-[#1B4820]/20 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed group flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 sm:flex-initial px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl bg-[#1B4820] text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-950 transition-all shadow-lg shadow-[#1B4820]/20 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed group flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Continuar
                   <Syringe className="w-4 h-4 group-hover:rotate-12 transition-transform" />
