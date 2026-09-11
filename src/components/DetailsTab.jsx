@@ -9,6 +9,7 @@ import { calculateAge, formatWeight, formatDateLocal } from '@/lib/dateUtils';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 /**
  * Componente que muestra la pureza genética respetando:
@@ -374,13 +375,20 @@ export default function DetailsTab({ animal, onEdit }) {
           </section>
         )}
 
-        {/* Botón Editar para MÓVIL */}
-        <button 
+        {/* Botón Flotante Editar para MÓVIL (FAB) */}
+        <motion.button 
+          initial={{ opacity: 0, scale: 0.85, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          whileTap={{ scale: 0.93 }}
+          transition={{ duration: 0.2 }}
           onClick={onEdit}
-          className="md:hidden w-full flex items-center justify-center gap-2 bg-[#1B4820] active:scale-[0.98] text-white font-bold py-4 rounded-2xl shadow-md transition-all cursor-pointer text-xs uppercase tracking-widest mt-6 mb-4"
+          className="fixed bottom-20 right-4 z-30 md:hidden flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-4 py-3 rounded-full shadow-[0_8px_25px_rgba(27,72,32,0.4)] border border-emerald-600/30 cursor-pointer text-xs uppercase tracking-wider backdrop-blur-xs"
+          title="Editar Animal"
+          aria-label="Editar Animal"
         >
-          <Pencil className="w-4 h-4" /> Editar Animal
-        </button>
+          <Pencil className="w-4 h-4" />
+          <span>Editar</span>
+        </motion.button>
       </div>
     </div>
   );

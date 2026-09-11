@@ -4,6 +4,17 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.9-ui-mobile-fab-edit] - 2026-09-11
+
+### Agregado y Modificado
+- **Botón Flotante de Edición (FAB) en Resolución Móvil ([`DetailsTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/DetailsTab.jsx))**:
+  - Se transformó el botón de edición móvil estático del final del formulario en un botón de acción flotante (*Floating Action Button - FAB*).
+  - Posicionado estratégicamente a `fixed bottom-20 right-4 z-30 md:hidden` para ubicarse directamente en la zona ergonómica del pulgar, flotando sobre la barra inferior de navegación sin obstruirla.
+  - Diseñado en forma de píldora con fondo corporativo (`#1B4820`), borde con relieve sutil, sombra profunda (`shadow-[0_8px_25px_rgba(27,72,32,0.4)]`), micro-animación de entrada y respuesta háptica táctil (`whileTap={{ scale: 0.93 }}` vía `framer-motion`), permitiendo al ganadero editar la ficha en cualquier punto del desplazamiento sin tener que bajar hasta el fondo.
+  - En resolución de escritorio (`md`), se mantiene intacto el botón en la columna izquierda fija.
+
+---
+
 ## [1.2.8-ui-form-genetics-and-pill-cleanup] - 2026-09-11
 
 ### Corregido y Modificado
