@@ -4,6 +4,18 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.1-sync-reconciliation] - 2026-09-10
+
+### Corregido
+- **Sincronización Bidireccional de Eliminaciones (Supabase -> Dexie)**:
+  - Resuelto el problema donde eliminar una finca (o cualquier registro) directamente en Supabase o panel administrativo no se reflejaba localmente hasta cerrar e iniciar sesión nuevamente.
+  - En [`src/lib/syncUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/syncUtils.js):
+    - **Reconciliación de IDs del Servidor**: Nueva función `fetchAllServerIds` que consulta de forma paginada todos los IDs y estados `deleted_at` activos en Supabase para el usuario.
+    - **Detección de Eliminaciones Físicas (Hard Delete)**: Si un registro existía en Dexie pero fue borrado físicamente en Supabase (ej. desde el Table Editor), se elimina automáticamente de Dexie con `bulkDelete`, actualizando al instante los hooks reactivos `useLiveQuery` en la UI.
+    - **Propagación de Borrado Lógico (Soft Delete)**: Si un registro en Supabase fue marcado con `deleted_at` sin actualizar su `updated_at`, la reconciliación detecta el estado y actualiza Dexie en bloque.
+    - **Protección de Datos Offline**: Se mapean previamente todos los IDs presentes en `sync_queue` para asegurar que ningún registro creado o editado sin internet sea eliminado antes de haber sido subido a la nube.
+    - **Respaldo Forzado Seguro**: En `forceFullResync()`, se procesa primero la cola de subida (`processSyncQueue`) antes de retroceder la marca temporal de sincronización, blindando las operaciones locales pendientes.
+
 ---
 
 ## [1.2.0-ui-inventario] - 2026-09-10

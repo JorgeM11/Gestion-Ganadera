@@ -108,6 +108,28 @@ export async function processSyncQueue() {
 }
 
 /**
+ * Descarga paginada de todos los IDs y estados deleted_at del servidor para una tabla
+ */
+async function fetchAllServerIds(table, userId) {
+  let allRecords = [];
+  let from = 0;
+  const pageSize = 1000;
+  while (true) {
+    let query = supabase.from(table).select('id, deleted_at').range(from, from + pageSize - 1);
+    if (table !== 'usuarios') {
+      query = query.eq('user_id', userId);
+    }
+    const { data, error } = await withTimeout(query, 12000);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    allRecords.push(...data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return allRecords;
+}
+
+/**
  * 2. PULL: De Nube a Local (Offline-First, sin bloqueo por token JWT)
  */
 export async function pullFromServer() {
@@ -121,6 +143,18 @@ export async function pullFromServer() {
 
   const lastSync = localStorage.getItem('lastSyncTimestamp') || '1970-01-01T00:00:00Z';
   const currentSyncTime = new Date().toISOString();
+
+  // Mapeamos los items pendientes en la cola local para protegerlos de eliminación durante la reconciliación
+  const pendingQueue = await db.sync_queue.toArray();
+  const pendingIdsByTable = new Map();
+  for (const item of pendingQueue) {
+    if (!pendingIdsByTable.has(item.table_name)) {
+      pendingIdsByTable.set(item.table_name, new Set());
+    }
+    if (item.payload && item.payload.id) {
+      pendingIdsByTable.get(item.table_name).add(item.payload.id);
+    }
+  }
 
   const tables = [
     'farms',
@@ -170,6 +204,51 @@ export async function pullFromServer() {
 
       // 2. Guardado en Dexie: 1 sola transacción en bloque
       await db.table(table).bulkPut(serverData);
+    }
+
+    // 3. RECONCILIACIÓN DE BORRADOS (Supabase -> Dexie)
+    // Permite que eliminaciones directas en Supabase o panel administrativo se sincronicen en local
+    if (table !== 'usuarios') {
+      try {
+        const serverIds = await fetchAllServerIds(table, userId);
+        const serverMap = new Map(serverIds.map(r => [r.id, r]));
+        const localRecords = await db.table(table).toArray();
+        const pendingIds = pendingIdsByTable.get(table) || new Set();
+
+        const toDeleteLocally = [];
+        const toUpdateSoftDelete = [];
+
+        for (const local of localRecords) {
+          // Si el registro está en cola pendiente de subida local, protegerlo siempre
+          if (pendingIds.has(local.id)) continue;
+
+          if (!serverMap.has(local.id)) {
+            // Borrado definitivo (Hard Delete) en Supabase: ya no existe en el servidor
+            toDeleteLocally.push(local.id);
+          } else {
+            const serverRec = serverMap.get(local.id);
+            // Borrado lógico (Soft Delete) en Supabase que aún no tenía deleted_at en local
+            if (serverRec.deleted_at && !local.deleted_at) {
+              toUpdateSoftDelete.push({
+                ...local,
+                deleted_at: serverRec.deleted_at
+              });
+            }
+          }
+        }
+
+        if (toDeleteLocally.length > 0) {
+          await db.table(table).bulkDelete(toDeleteLocally);
+          console.log(`[Sync Engine] Reconciliación: eliminados ${toDeleteLocally.length} registros en local de ${table} borrados en el servidor.`);
+        }
+
+        if (toUpdateSoftDelete.length > 0) {
+          await db.table(table).bulkPut(toUpdateSoftDelete);
+          console.log(`[Sync Engine] Reconciliación: marcados como borrados ${toUpdateSoftDelete.length} registros en local de ${table}.`);
+        }
+      } catch (recError) {
+        console.warn(`[Sync Engine] Advertencia durante la reconciliación de borrados de ${table}:`, recError.message);
+      }
     }
   }
   localStorage.setItem('lastSyncTimestamp', currentSyncTime);
@@ -263,10 +342,17 @@ export async function forceFullResync() {
     store.setSyncStatus('SYNCING');
     console.log('[Sync Engine] Iniciando Resincronización Forzada...');
     
+    // 0. Subir cambios locales pendientes primero para proteger datos no sincronizados
+    try {
+      await processSyncQueue();
+    } catch (pushErr) {
+      console.warn('[Sync Engine] Advertencia procesando cola antes del respaldo forzado:', pushErr.message);
+    }
+
     // 1. Retrocedemos el reloj al inicio de los tiempos
     localStorage.setItem('lastSyncTimestamp', '1970-01-01T00:00:00Z');
     
-    // 2. Ejecutamos el PULL puro (para traer todo)
+    // 2. Ejecutamos el PULL puro (para traer todo y reconciliar borrados)
     await pullFromServer();
     
     store.setSyncStatus('UP_TO_DATE');
