@@ -22,19 +22,6 @@ import { useNavigate } from 'react-router-dom';
 import { formatShortDateLocal } from '@/lib/dateUtils';
 import { DateInput } from '@/components/ui/DateInput';
 
-export const NAVEL_LENGTH_OPTIONS = [
-  { value: '', label: '— Sin especificar —' },
-  { value: '1', label: '1' },
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-  { value: '5', label: '5' },
-  { value: '6', label: '6' },
-  { value: '7', label: '7' },
-  { value: '8', label: '8' },
-  { value: '9', label: '9' }
-];
-
 // Esquema de validación con Zod
 const animalSchema = z.object({
   number: z.string().min(1, 'El código es obligatorio'),
@@ -51,7 +38,10 @@ const animalSchema = z.object({
   birth_date: z.string().nullable().optional().refine(val => !val || new Date(val) <= new Date(), { message: 'La fecha no puede ser futura' }),
   birth_weight_kg: z.preprocess((val) => (val === '' || val === null) ? undefined : Number(val), z.number().optional()),
   mother_weight_at_birth: z.preprocess((val) => (val === '' || val === null) ? undefined : Number(val), z.number().optional()),
-  navel_length: z.string().nullable().optional(),
+  navel_length: z.string()
+    .refine(val => !val || /^[1-9]$/.test(val), { message: 'Debe ser del 1 al 9' })
+    .nullable()
+    .optional(),
   birth_observations: z.string().nullable().optional(),
 
   weaning_date: z.string().nullable().optional().refine(val => !val || new Date(val) <= new Date(), { message: 'La fecha no puede ser futura' }),
@@ -947,14 +937,34 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Longitud del Ombligo</label>
-                    <CustomSelect
-                      value={navelLength ? String(navelLength) : ''}
-                      onChange={(val) => setValue('navel_length', val || null, { shouldDirty: true })}
-                      options={NAVEL_LENGTH_OPTIONS}
-                      placeholder="Seleccionar (1 al 9)..."
-                      bgClass="bg-white"
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Longitud del Ombligo (1 - 9)</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      placeholder="1 al 9"
+                      {...register('navel_length', {
+                        onChange: (e) => {
+                          const cleaned = e.target.value.replace(/[^1-9]/g, '').slice(-1);
+                          e.target.value = cleaned;
+                          setValue('navel_length', cleaned || null, { shouldDirty: true });
+                        }
+                      })}
+                      onKeyDown={(e) => {
+                        if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Escape', 'Enter'].includes(e.key)) {
+                          return;
+                        }
+                        if (!/^[1-9]$/.test(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      className={`w-full bg-white rounded-xl px-4 py-3 border transition-all outline-none focus:ring-2 focus:ring-[#1B4820]/20 font-bold text-neutral-800 ${
+                        errors.navel_length ? 'border-red-500' : 'border-neutral-100 focus:border-[#1B4820]/30'
+                      }`}
                     />
+                    {errors.navel_length && (
+                      <p className="text-red-500 text-[10px] mt-1 ml-1">{errors.navel_length.message}</p>
+                    )}
                   </div>
                 </div>
 

@@ -4,12 +4,13 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
-## [1.2.5-ui-navel-length-select] - 2026-09-11
+## [1.2.5-ui-navel-length-input] - 2026-09-11
 
 ### Modificado
-- **Longitud del Ombligo como Selector Numérico 1 al 9 ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
-  - Reemplazado el campo de texto libre de longitud de ombligo en centímetros por un selector (`CustomSelect`) con opciones del **1 al 9**, adaptado a la escala estándar de evaluación morfológica bovina.
-  - Integrada la detección de datos del ombligo en el badge reactivo de estado del acordeón de nacimiento (`hasBirthData`), activando el indicador "Con datos" al seleccionar un valor.
+- **Longitud del Ombligo como Campo de Texto Restringido del 1 al 9 ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - Implementado como un campo de texto con `inputMode="numeric"` y `maxLength={1}`, que bloquea a nivel de teclado (`onKeyDown`) e inserción (`onChange`) cualquier caracter que no sea un número entre el **1 y el 9**.
+  - Validación con esquema Zod que garantiza que el valor solo pueda ser un dígito entre 1 y 9 o quedar vacío si no se especifica.
+  - Integrada la detección de datos del ombligo en el badge reactivo de estado del acordeón de nacimiento (`hasBirthData`), activando el indicador "Con datos" al ingresar un valor válido.
   - Actualizado [`EventForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/EventForm.jsx) para sincronizar las opciones de Largo Viril/Ombligo del 1 al 9 en los eventos de crecimiento y evolución.
 
 ---
