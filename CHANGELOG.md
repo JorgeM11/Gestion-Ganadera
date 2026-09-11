@@ -4,6 +4,17 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.7-ui-reproduction-tab-refinements] - 2026-09-11
+
+### Agregado y Modificado
+- **Refinamiento de la Vista de Reproducción ([`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx))**:
+  - Se removieron los 3 cuadros de métricas KPI a solicitud del usuario, manteniendo una interfaz más limpia, ágil y directa enfocada en las pestañas interactivas.
+- **Ajustes en la Sección de Partos ([`PartosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/PartosTab.jsx))**:
+  - **Redirección a Vista de Detalles**: Al pulsar "Ver Ficha" de cualquier cría nacida, ahora se redirige explícitamente a su pestaña de detalles (`/inventario/perfil?id=${calf.id}&tab=details`).
+  - **Remoción de Acciones de Creación en Partos**: Se eliminaron los botones de acción flotante (FAB móvil y de escritorio) y el botón del estado vacío para que no sea posible registrar partos directamente desde esta vista (los partos se registran al ingresar una nueva cría al inventario).
+
+---
+
 ## [1.3.6-ui-reproduction-tab-modernization] - 2026-09-11
 
 ### Agregado y Modificado

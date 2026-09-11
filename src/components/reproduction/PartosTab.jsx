@@ -5,8 +5,7 @@ import { db } from '@/lib/db';
 import { formatDateLocal } from '@/lib/dateUtils';
 import { GiCow } from 'react-icons/gi';
 import { FaMars, FaVenus } from 'react-icons/fa6';
-import { Plus, ArrowUpRight, Calendar, Scale, Dna } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowUpRight, Calendar, Scale, Dna } from 'lucide-react';
 
 export default function PartosTab({ animalId, animal }) {
   const offspring = useLiveQuery(
@@ -19,7 +18,7 @@ export default function PartosTab({ animalId, animal }) {
   ) || [];
 
   return (
-    <div className="space-y-4 pb-20 sm:pb-0">
+    <div className="space-y-4">
       {offspring && offspring.length > 0 ? (
         <div className="space-y-3">
           {offspring.map((calf) => {
@@ -80,10 +79,10 @@ export default function PartosTab({ animalId, animal }) {
                   </div>
                 </div>
 
-                {/* Enlace al perfil de la cría */}
+                {/* Enlace al perfil de la cría en su vista de detalles */}
                 <div className="flex items-center justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
                   <Link
-                    to={`/inventario/perfil?id=${calf.id}`}
+                    to={`/inventario/perfil?id=${calf.id}&tab=details`}
                     className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-neutral-600 group-hover:text-[#1B4820] bg-neutral-50 group-hover:bg-[#EEF7EE] rounded-xl transition-colors cursor-pointer border border-neutral-200/60 group-hover:border-[#1B4820]/20"
                   >
                     <span>Ver Ficha</span>
@@ -95,8 +94,8 @@ export default function PartosTab({ animalId, animal }) {
           })}
         </div>
       ) : (
-        /* Estado Vacío */
-        <div className="bg-white rounded-3xl p-10 border border-neutral-100 text-center shadow-sm space-y-4">
+        /* Estado Vacío Informativo (Sin botón de agregar) */
+        <div className="bg-white rounded-3xl p-10 border border-neutral-100 text-center shadow-sm space-y-3">
           <div className="w-16 h-16 rounded-full bg-emerald-50 text-[#1B4820] flex items-center justify-center mx-auto border border-emerald-100">
             <GiCow className="w-8 h-8 opacity-70" />
           </div>
@@ -106,59 +105,8 @@ export default function PartosTab({ animalId, animal }) {
               No se han registrado crías nacidas de #{animal?.number || 'este animal'}.
             </p>
           </div>
-          <Link
-            to={`/inventario/nuevo?mother_id=${animalId}`}
-            className="inline-flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-5 py-3 rounded-full text-xs uppercase tracking-wider shadow-sm transition-all active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Registrar Nuevo Parto</span>
-          </Link>
         </div>
       )}
-
-      {/* Botón Flotante para MÓVIL (FAB) con animación rápida y suave */}
-      <Link to={`/inventario/nuevo?mother_id=${animalId}`}>
-        <motion.button 
-          initial={{ opacity: 0, scale: 0.88, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.88, y: 8 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 450, 
-            damping: 30, 
-            mass: 0.6 
-          }}
-          whileTap={{ scale: 0.92 }}
-          className="fixed bottom-20 right-4 z-30 md:hidden flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-4 py-3 rounded-full shadow-[0_8px_25px_rgba(27,72,32,0.4)] border border-emerald-600/30 cursor-pointer text-xs uppercase tracking-wider backdrop-blur-xs"
-          title="Registrar Parto"
-          aria-label="Registrar Parto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Parto</span>
-        </motion.button>
-      </Link>
-
-      {/* Botón Flotante Redondo con '+' para COMPUTADORA (DESKTOP) */}
-      <Link to={`/inventario/nuevo?mother_id=${animalId}`}>
-        <motion.button 
-          initial={{ opacity: 0, scale: 0.88, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.88, y: 8 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 450, 
-            damping: 30, 
-            mass: 0.6 
-          }}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          className="fixed bottom-8 right-8 z-30 hidden md:flex items-center justify-center w-14 h-14 bg-[#1B4820] hover:bg-[#123316] text-white rounded-full shadow-[0_10px_30px_rgba(27,72,32,0.45)] border border-emerald-600/30 cursor-pointer transition-colors group"
-          title="Registrar Nuevo Parto"
-          aria-label="Registrar Nuevo Parto"
-        >
-          <Plus className="w-7 h-7 transition-transform group-hover:rotate-90 duration-300" strokeWidth={2.5} />
-        </motion.button>
-      </Link>
     </div>
   );
 }
