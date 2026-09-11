@@ -4,6 +4,20 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.3-ui-fast-snappy-tab-animations] - 2026-09-11
+
+### Agregado y Modificado
+- **Optimización de Velocidad y Respuesta en Animaciones de Pestañas ([`PerfilAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/PerfilAnimal.jsx))**:
+  - Se redujo drásticamente el tiempo de transición entre pestañas de 180ms a 100ms con curva `easeOut` ultra-reactiva (`duration: 0.1`), eliminando cualquier sensación de lentitud o retraso al alternar entre Detalles, Evolución, Reproducción y Salud.
+  - Micro-desvanecimiento del título del encabezado optimizado a 100ms sincronizado.
+- **Micro-física Instantánea en Botones Flotantes (FABs) ([`DetailsTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/DetailsTab.jsx), [`EvolutionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/EvolutionTab.jsx))**:
+  - Eliminado el retraso artificial (`delay: 0`) para que los botones de acción flotante (editar en móvil y crear evento tanto en móvil como en escritorio circular) aparezcan instantáneamente.
+  - Física tipo resorte ajustada a alta reactividad (`stiffness: 450, damping: 30, mass: 0.6`) con menor recorrido vertical (`y: 10 -> 0`, `scale: 0.88 -> 1`), logrando una aparición inmediata, firme y suave sin brincos ni parpadeos.
+- **Aceleración de Sub-pestañas de Reproducción ([`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx))**:
+  - Optimizado el cambio entre Partos, Tactos y Servicios a `duration: 0.1` puro sin salto de eje `y`, unificando la velocidad en toda la experiencia de usuario.
+
+---
+
 ## [1.3.2-ui-fab-smooth-and-desktop-round] - 2026-09-11
 
 ### Agregado y Modificado

@@ -156,7 +156,7 @@ export default function EvolutionTab({ animal }) {
                       {event.weight_kg !== null && event.weight_kg !== undefined && (
                         <DataBox 
                           icon={Scale} 
-                          label="Peso Animal" 
+                          label="Peso" 
                           value={formatWeight(event.weight_kg)}
                           delta={weightDiff !== null && (
                             <span className={`inline-flex items-center gap-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-md ${
@@ -216,17 +216,16 @@ export default function EvolutionTab({ animal }) {
         )}
       </div>
 
-      {/* Botón Flotante para MÓVIL (FAB) con animación suave */}
+      {/* Botón Flotante para MÓVIL (FAB) con animación rápida y suave */}
       <motion.button 
-        initial={{ opacity: 0, scale: 0.82, y: 16 }}
+        initial={{ opacity: 0, scale: 0.88, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.82, y: 12 }}
+        exit={{ opacity: 0, scale: 0.88, y: 8 }}
         transition={{ 
           type: "spring", 
-          stiffness: 240, 
-          damping: 24, 
-          mass: 0.8,
-          delay: 0.08 
+          stiffness: 450, 
+          damping: 30, 
+          mass: 0.6 
         }}
         whileTap={{ scale: 0.92 }}
         onClick={() => setIsCreateOpen(true)}
@@ -240,15 +239,14 @@ export default function EvolutionTab({ animal }) {
 
       {/* Botón Flotante Redondo con '+' para COMPUTADORA (DESKTOP) */}
       <motion.button 
-        initial={{ opacity: 0, scale: 0.82, y: 16 }}
+        initial={{ opacity: 0, scale: 0.88, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.82, y: 12 }}
+        exit={{ opacity: 0, scale: 0.88, y: 8 }}
         transition={{ 
           type: "spring", 
-          stiffness: 240, 
-          damping: 24, 
-          mass: 0.8,
-          delay: 0.08 
+          stiffness: 450, 
+          damping: 30, 
+          mass: 0.6 
         }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}

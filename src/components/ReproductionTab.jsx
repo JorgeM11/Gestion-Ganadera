@@ -55,10 +55,10 @@ export default function ReproductionTab({ animal }) {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeSubTab}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1, ease: "easeOut" }}
           >
             {activeSubTab === 'partos' && <PartosTab animalId={animalId} />}
             {activeSubTab === 'tactos' && <TactosTab animal={animal} />}

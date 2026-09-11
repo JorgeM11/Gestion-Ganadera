@@ -121,7 +121,7 @@ function ProfileContent() {
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.16, ease: "easeOut" }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
               className="text-xl font-bold text-[#1B4820]"
             >
               {activeTab === 'details' ? 'Ficha del Animal' :
@@ -169,7 +169,7 @@ function ProfileContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.18, ease: "easeInOut" }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
             >
               {activeTab === 'details' && <DetailsTab animal={animal} onEdit={() => setIsEditModalOpen(true)} />}
               {activeTab === 'evolution' && <EvolutionTab animal={animal} />}
