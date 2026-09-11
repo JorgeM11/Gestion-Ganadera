@@ -82,7 +82,7 @@ export default function ReproductionTab({ animal }) {
             <button
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`relative flex items-center cursor-pointer justify-center gap-1 sm:gap-2 px-2 py-2 sm:px-4 sm:py-2.5 rounded-full font-bold text-[11px] sm:text-xs uppercase tracking-tight sm:tracking-wider transition-colors select-none active:scale-95 w-full sm:w-auto ${
+              className={`relative flex items-center cursor-pointer justify-center gap-1 sm:gap-2 px-1.5 py-2 sm:px-4 sm:py-2.5 rounded-full font-bold text-[9.5px] sm:text-xs uppercase tracking-tight sm:tracking-wider transition-colors select-none active:scale-95 w-full sm:w-auto ${
                 isActive
                   ? 'text-white'
                   : 'bg-white text-neutral-600 border border-neutral-200/80 hover:bg-neutral-50'
@@ -96,9 +96,9 @@ export default function ReproductionTab({ animal }) {
                 />
               )}
               <span className="relative z-10 flex items-center justify-center gap-1 sm:gap-2 min-w-0">
-                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <Icon className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
                 <span className="truncate">{tab.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
+                <span className={`text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
                   isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-600'
                 }`}>
                   {tab.count}

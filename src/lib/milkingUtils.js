@@ -110,3 +110,53 @@ export async function getDailyFarmMilkingTotal(dateStr = new Date().toISOString(
     animalsCount: new Set(records.map(r => r.animal_id)).size
   };
 }
+
+/**
+ * Actualiza un registro de ordeño existente
+ */
+export async function updateMilkingRecord({
+  id,
+  milking_date,
+  shift,
+  liters,
+  observations = ''
+}) {
+  if (!id) throw new Error('ID requerido para actualizar');
+  const parsedLiters = Number(liters);
+  if (isNaN(parsedLiters) || parsedLiters < 0) {
+    throw new Error('Los litros deben ser un número mayor o igual a 0');
+  }
+
+  const existing = await db.milking_records.get(id);
+  if (!existing) throw new Error('Registro de ordeño no encontrado');
+
+  const now = new Date().toISOString();
+  const updated = {
+    ...existing,
+    milking_date: milking_date || existing.milking_date,
+    shift: shift || existing.shift,
+    liters: parsedLiters,
+    observations: observations !== undefined ? (observations?.trim() || null) : existing.observations,
+    updated_at: now
+  };
+
+  await db.transaction('rw', [db.milking_records, db.sync_queue], async () => {
+    await db.milking_records.put(updated);
+    await addToSyncQueue('milking_records', 'UPDATE', updated);
+  });
+
+  return updated;
+}
+
+/**
+ * Eliminación lógica (soft delete) de un registro de ordeño
+ */
+export async function deleteMilkingRecord(id) {
+  if (!id) return;
+  const now = new Date().toISOString();
+  await db.transaction('rw', [db.milking_records, db.sync_queue], async () => {
+    await db.milking_records.update(id, { deleted_at: now, updated_at: now });
+    await addToSyncQueue('milking_records', 'PATCH', { id, deleted_at: now });
+  });
+}
+

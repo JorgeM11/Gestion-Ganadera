@@ -3,10 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Milk } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { createMilkingRecord } from '@/lib/milkingUtils';
+import { createMilkingRecord, updateMilkingRecord } from '@/lib/milkingUtils';
 import CustomSelect from '@/components/ui/CustomSelect';
 
-export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated }) {
+export default function MilkingModal({ 
+  isOpen, 
+  onClose, 
+  animal, 
+  onRecordCreated,
+  onRecordUpdated,
+  recordToEdit = null 
+}) {
   const [selectedAnimalId, setSelectedAnimalId] = useState(animal?.id || '');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [shift, setShift] = useState('Mañana');
@@ -22,18 +29,32 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
   ) || [];
 
   useEffect(() => {
-    if (animal) {
-      setSelectedAnimalId(animal.id);
-    } else if (femaleCows.length > 0 && !selectedAnimalId) {
-      setSelectedAnimalId(femaleCows[0].id);
+    if (recordToEdit) {
+      setSelectedAnimalId(recordToEdit.animal_id || animal?.id || '');
+      setDate(recordToEdit.milking_date || new Date().toISOString().split('T')[0]);
+      setShift(recordToEdit.shift || 'Mañana');
+      setLiters(recordToEdit.liters !== undefined && recordToEdit.liters !== null ? String(recordToEdit.liters) : '');
+      setObservations(recordToEdit.observations || '');
+      setError('');
+    } else {
+      if (animal) {
+        setSelectedAnimalId(animal.id);
+      } else if (femaleCows.length > 0 && !selectedAnimalId) {
+        setSelectedAnimalId(femaleCows[0].id);
+      }
+      setDate(new Date().toISOString().split('T')[0]);
+      setShift('Mañana');
+      setLiters('');
+      setObservations('');
+      setError('');
     }
-  }, [animal, femaleCows]);
+  }, [recordToEdit, isOpen, animal, femaleCows]);
 
   const currentAnimal = animal || femaleCows.find(a => a.id === selectedAnimalId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!currentAnimal) {
+    if (!currentAnimal && !recordToEdit) {
       setError('Debes seleccionar una vaca para registrar el ordeño');
       return;
     }
@@ -47,17 +68,30 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
     setIsSaving(true);
     setError('');
     try {
-      const record = await createMilkingRecord({
-        animal_id: currentAnimal.id,
-        farm_id: currentAnimal.farm_id || null,
-        milking_date: date,
-        shift,
-        liters: parsed,
-        observations
-      });
-      setLiters('');
-      setObservations('');
-      if (onRecordCreated) onRecordCreated(record, currentAnimal);
+      if (recordToEdit) {
+        const updated = await updateMilkingRecord({
+          id: recordToEdit.id,
+          milking_date: date,
+          shift,
+          liters: parsed,
+          observations
+        });
+        setLiters('');
+        setObservations('');
+        if (onRecordUpdated) onRecordUpdated(updated, currentAnimal);
+      } else {
+        const record = await createMilkingRecord({
+          animal_id: currentAnimal.id,
+          farm_id: currentAnimal.farm_id || null,
+          milking_date: date,
+          shift,
+          liters: parsed,
+          observations
+        });
+        setLiters('');
+        setObservations('');
+        if (onRecordCreated) onRecordCreated(record, currentAnimal);
+      }
       onClose();
     } catch (err) {
       setError(err.message || 'Error al guardar el registro de ordeño');
@@ -94,7 +128,9 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
                   <Milk className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-neutral-900">Registro de Ordeño</h3>
+                  <h3 className="text-base font-bold text-neutral-900">
+                    {recordToEdit ? 'Editar Registro de Ordeño' : 'Registro de Ordeño'}
+                  </h3>
                   <p className="text-xs text-neutral-500">
                     {currentAnimal 
                       ? `Vaca: #${currentAnimal.number} ${currentAnimal.breed ? `(${currentAnimal.breed})` : ''}`
@@ -119,7 +155,7 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {!animal && (
+              {!animal && !recordToEdit && (
                 <div>
                   <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 block">
                     Seleccionar Vaca *
@@ -213,7 +249,7 @@ export default function MilkingModal({ isOpen, onClose, animal, onRecordCreated 
                   disabled={isSaving}
                   className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-[#1B4820] hover:bg-emerald-950 transition-colors shadow-md disabled:opacity-50 cursor-pointer"
                 >
-                  {isSaving ? 'Guardando...' : 'Guardar Registro'}
+                  {isSaving ? 'Guardando...' : (recordToEdit ? 'Guardar Cambios' : 'Guardar Registro')}
                 </button>
               </div>
             </form>

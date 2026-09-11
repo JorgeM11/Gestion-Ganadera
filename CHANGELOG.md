@@ -4,6 +4,21 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.9-milking-tab-crud-and-tabs-text-size] - 2026-09-11
+
+### Agregado y Modificado
+- **Módulo de Ordeño - Edición y Eliminación ([`MilkingTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/MilkingTab.jsx), [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx), [`milkingUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/milkingUtils.js))**:
+  - **Edición y Eliminación de Registros**: En cada fila del historial de pesajes de leche se añadieron botones de acción directa (`Pencil` y `Trash2`).
+  - **Edición en Modal**: [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx) ahora soporta tanto creación como edición de registros de ordeño, precargando fecha, turno, litros y observaciones, e invocando la nueva función `updateMilkingRecord`.
+  - **Eliminación Segura con Modal de Confirmación**: Se integró [`ConfirmDialog.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/ConfirmDialog.jsx) con `isDanger={true}`, advirtiendo antes de eliminar y aplicando soft-delete atómico en Dexie y encolamiento offline (`PATCH`) con `deleteMilkingRecord`.
+  - **Coherencia en Botones Flotantes (FABs)**:
+    - **Móvil (`md:hidden`)**: Botón flotante píldora en `bottom-20 right-4 z-30` con texto *Ordeño*, icono `Plus` y micro-física elástica rápida (`stiffness: 450, damping: 30, mass: 0.6`).
+    - **Escritorio (`hidden md:flex`)**: Botón circular `w-14 h-14` en `bottom-8 right-8 z-30` con animación de giro de cruz (`+`) al interactuar.
+- **Micro-tipografía de Sub-pestañas en Reproducción ([`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx))**:
+  - Se ajustó el tamaño del texto en vista móvil a `text-[9.5px]` con icono compacto `w-3 h-3` y badge `text-[9px]`, brindando aún mayor soltura visual y comodidad sin sobrecargar los botones.
+
+---
+
 ## [1.3.8-sync-patch-and-reproduction-tabs-fit] - 2026-09-11
 
 ### Corregido y Modificado
