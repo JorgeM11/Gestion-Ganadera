@@ -38,7 +38,7 @@ export default function TactosTab({ animal }) {
       const now = new Date().toISOString();
       await db.transaction('rw', [db.pregnancy_checks, db.sync_queue], async () => {
         await db.pregnancy_checks.update(checkToDelete.id, { deleted_at: now });
-        await addToSyncQueue('pregnancy_checks', 'UPDATE', { id: checkToDelete.id, deleted_at: now });
+        await addToSyncQueue('pregnancy_checks', 'PATCH', { id: checkToDelete.id, deleted_at: now });
       });
       setCheckToDelete(null);
     } catch (err) {

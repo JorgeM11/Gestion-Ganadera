@@ -54,20 +54,49 @@ export async function processSyncQueue() {
 
       // --- SUBIDA A BASE DE DATOS ---
       let error;
-      if (item.operation === 'INSERT' || item.operation === 'UPDATE') {
+      if (item.operation === 'PATCH' || (item.operation === 'UPDATE' && !payloadToUpload.user_id)) {
+        // UPDATE parcial (ej. soft-delete { id, deleted_at } o campos específicos):
+        // Usar HTTP PATCH (update) para evitar que PostgREST valide NOT NULL en columnas ausentes
+        const { id, ...fields } = payloadToUpload;
+        if (id) {
+          const { error: patchError } = await withTimeout(
+            supabase.from(item.table_name).update(fields).eq('id', id),
+            15000 // 15s de gracia
+          );
+          error = patchError;
+        } else {
+          console.warn(`[Sync Engine] Operación PATCH/UPDATE en ${item.table_name} ignorada: no tiene id.`);
+        }
+      } else if (item.operation === 'INSERT') {
         const { error: upsertError } = await withTimeout(
           supabase.from(item.table_name).upsert(payloadToUpload),
           15000 // 15s de gracia
         );
         error = upsertError;
-      } else if (item.operation === 'PATCH') {
-        // UPDATE parcial: solo actualiza los campos del payload sin sobreescribir los demás
+      } else if (item.operation === 'UPDATE') {
+        // UPDATE con payload completo: intentar update por ID primero; si falla, upsert
         const { id, ...fields } = payloadToUpload;
-        const { error: patchError } = await withTimeout(
-          supabase.from(item.table_name).update(fields).eq('id', id),
-          15000 // 15s de gracia
-        );
-        error = patchError;
+        if (id) {
+          const { error: updateError } = await withTimeout(
+            supabase.from(item.table_name).update(fields).eq('id', id),
+            15000
+          );
+          if (updateError) {
+            const { error: upsertError } = await withTimeout(
+              supabase.from(item.table_name).upsert(payloadToUpload),
+              15000
+            );
+            error = upsertError;
+          } else {
+            error = updateError;
+          }
+        } else {
+          const { error: upsertError } = await withTimeout(
+            supabase.from(item.table_name).upsert(payloadToUpload),
+            15000
+          );
+          error = upsertError;
+        }
       } else if (item.operation === 'DELETE') {
         const { error: deleteError } = await withTimeout(
           supabase.from(item.table_name).delete().eq('id', item.payload.id),

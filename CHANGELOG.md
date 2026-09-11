@@ -4,6 +4,20 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.8-sync-patch-and-reproduction-tabs-fit] - 2026-09-11
+
+### Corregido y Modificado
+- **Motor de Sincronización Supabase ([`syncUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/syncUtils.js))**:
+  - Se corrigió el error HTTP 400 (*Bad Request*) en endpoints como `/rest/v1/health_records` y `/rest/v1/pregnancy_checks`.
+  - La raíz del error se debía a que las operaciones de eliminación lógica (*soft delete*) o actualizaciones parciales sin `user_id` eran procesadas con `upsert(payload)`, lo que provocaba que Supabase ejecutara un `INSERT ... ON CONFLICT` e invalidara las restricciones `NOT NULL` de columnas omitidas (`user_id`, etc.).
+  - Se implementó encolamiento y subida mediante `PATCH` / `.update(fields).eq('id', id)`, garantizando que cualquier actualización o soft-delete parcial se aplique directamente sobre las columnas indicadas sin requerir el payload completo ni provocar fallos 400.
+  - Se actualizaron los disparadores de eliminación lógica en [`HealthTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/HealthTab.jsx), [`TactosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/TactosTab.jsx) y [`ServiciosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/ServiciosTab.jsx) para registrar explícitamente `'PATCH'`.
+- **Adaptabilidad Móvil de Pestañas de Reproducción ([`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx))**:
+  - Se rediseñó el contenedor de sub-pestañas (`Partos`, `Palpación`, `Servicios`) utilizando una cuadrícula responsiva `grid grid-cols-3` en pantallas móviles (`< 640px`) y `sm:flex sm:justify-center` en pantallas mayores.
+  - Se eliminó la necesidad de desplazamiento horizontal (*scroll horizontal*), permitiendo que las tres opciones se distribuyan con ancho uniforme, tipografía adaptada (`text-[11px] sm:text-xs`), badges compactos y texto sin cortes en cualquier resolución móvil.
+
+---
+
 ## [1.3.7-ui-reproduction-tab-refinements] - 2026-09-11
 
 ### Agregado y Modificado

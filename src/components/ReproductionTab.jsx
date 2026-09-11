@@ -73,7 +73,7 @@ export default function ReproductionTab({ animal }) {
       </div>
 
       {/* 2. SUB-NAVEGACIÓN PILLS */}
-      <div className="flex items-center justify-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+      <div className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center sm:justify-center sm:gap-2 mb-6 max-w-lg mx-auto w-full px-1">
         {subTabs.map((tab) => {
           const isActive = activeSubTab === tab.id;
           const Icon = tab.icon;
@@ -82,7 +82,7 @@ export default function ReproductionTab({ animal }) {
             <button
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`relative flex items-center cursor-pointer justify-center gap-2 px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-colors whitespace-nowrap select-none active:scale-95 ${
+              className={`relative flex items-center cursor-pointer justify-center gap-1 sm:gap-2 px-2 py-2 sm:px-4 sm:py-2.5 rounded-full font-bold text-[11px] sm:text-xs uppercase tracking-tight sm:tracking-wider transition-colors select-none active:scale-95 w-full sm:w-auto ${
                 isActive
                   ? 'text-white'
                   : 'bg-white text-neutral-600 border border-neutral-200/80 hover:bg-neutral-50'
@@ -95,10 +95,10 @@ export default function ReproductionTab({ animal }) {
                   transition={{ type: "spring", stiffness: 450, damping: 32 }}
                 />
               )}
-              <span className="relative z-10 flex items-center gap-2">
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+              <span className="relative z-10 flex items-center justify-center gap-1 sm:gap-2 min-w-0">
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="truncate">{tab.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
                   isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-600'
                 }`}>
                   {tab.count}

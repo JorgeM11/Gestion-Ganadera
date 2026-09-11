@@ -117,7 +117,7 @@ export default function HealthTab({ animal }) {
       const now = new Date().toISOString();
       await db.transaction('rw', [db.health_records, db.sync_queue], async () => {
         await db.health_records.update(recordToDelete.id, { deleted_at: now });
-        await addToSyncQueue('health_records', 'UPDATE', { id: recordToDelete.id, deleted_at: now });
+        await addToSyncQueue('health_records', 'PATCH', { id: recordToDelete.id, deleted_at: now });
       });
       setRecordToDelete(null);
     } catch (err) {

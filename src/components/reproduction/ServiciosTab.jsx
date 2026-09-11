@@ -55,7 +55,7 @@ export default function ServiciosTab({ animal }) {
       const now = new Date().toISOString();
       await db.transaction('rw', [db.services, db.sync_queue], async () => {
         await db.services.update(serviceToDelete.id, { deleted_at: now });
-        await addToSyncQueue('services', 'UPDATE', { id: serviceToDelete.id, deleted_at: now });
+        await addToSyncQueue('services', 'PATCH', { id: serviceToDelete.id, deleted_at: now });
       });
       setServiceToDelete(null);
     } catch (err) {
