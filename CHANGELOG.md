@@ -4,6 +4,16 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.5-ui-navel-length-select] - 2026-09-11
+
+### Modificado
+- **Longitud del Ombligo como Selector Numérico 1 al 9 ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - Reemplazado el campo de texto libre de longitud de ombligo en centímetros por un selector (`CustomSelect`) con opciones del **1 al 9**, adaptado a la escala estándar de evaluación morfológica bovina.
+  - Integrada la detección de datos del ombligo en el badge reactivo de estado del acordeón de nacimiento (`hasBirthData`), activando el indicador "Con datos" al seleccionar un valor.
+  - Actualizado [`EventForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/EventForm.jsx) para sincronizar las opciones de Largo Viril/Ombligo del 1 al 9 en los eventos de crecimiento y evolución.
+
+---
+
 ## [1.2.4-fix-edit-modal-and-birth-icon] - 2026-09-11
 
 ### Corregido y Modificado

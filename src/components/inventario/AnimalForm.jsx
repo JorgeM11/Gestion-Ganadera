@@ -22,6 +22,19 @@ import { useNavigate } from 'react-router-dom';
 import { formatShortDateLocal } from '@/lib/dateUtils';
 import { DateInput } from '@/components/ui/DateInput';
 
+export const NAVEL_LENGTH_OPTIONS = [
+  { value: '', label: '— Sin especificar —' },
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+  { value: '3', label: '3' },
+  { value: '4', label: '4' },
+  { value: '5', label: '5' },
+  { value: '6', label: '6' },
+  { value: '7', label: '7' },
+  { value: '8', label: '8' },
+  { value: '9', label: '9' }
+];
+
 // Esquema de validación con Zod
 const animalSchema = z.object({
   number: z.string().min(1, 'El código es obligatorio'),
@@ -133,6 +146,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
       purity_percentage: initialValues.purity_percentage ?? 50,
       breed_composition: initialValues.breed_composition || null,
       current_weight_kg: initialValues.last_weight_kg,
+      navel_length: initialValues.navel_length ? String(initialValues.navel_length) : '',
     };
   }, [initialValues]);
 
@@ -152,11 +166,12 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
 
   const birthDate = watch('birth_date');
   const birthWeight = watch('birth_weight_kg');
+  const navelLength = watch('navel_length');
   const weaningDate = watch('weaning_date');
   const weaningWeight = watch('weaning_weight_kg');
   const originServiceId = watch('origin_service_id');
 
-  const hasBirthData = Boolean(birthDate || birthWeight || images.birth.preview);
+  const hasBirthData = Boolean(birthDate || birthWeight || navelLength || images.birth.preview);
   const hasWeaningData = Boolean(weaningDate || weaningWeight || images.weaning.preview);
   const hasServiceData = Boolean(originServiceId);
 
@@ -212,7 +227,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
         setValue('birth_date', birth.event_date);
         setValue('birth_weight_kg', birth.weight_kg);
         setValue('mother_weight_at_birth', birth.mother_weight_kg);
-        setValue('navel_length', birth.navel_length);
+        setValue('navel_length', birth.navel_length ? String(birth.navel_length) : '');
         setValue('birth_observations', birth.observations);
         
         // Priorizar BLOB local para previsualización en edición
@@ -932,8 +947,14 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Longitud del Ombligo (CM)</label>
-                    <input {...register('navel_length')} placeholder="Ej: 5" className="w-full bg-white rounded-xl px-4 py-3 border border-neutral-100 outline-none focus:ring-2 focus:ring-[#1B4820]/20 transition-all" />
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase mb-1 block ml-1">Longitud del Ombligo</label>
+                    <CustomSelect
+                      value={navelLength ? String(navelLength) : ''}
+                      onChange={(val) => setValue('navel_length', val || null, { shouldDirty: true })}
+                      options={NAVEL_LENGTH_OPTIONS}
+                      placeholder="Seleccionar (1 al 9)..."
+                      bgClass="bg-white"
+                    />
                   </div>
                 </div>
 
