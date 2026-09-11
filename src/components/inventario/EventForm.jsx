@@ -433,9 +433,9 @@ export default function EventForm({
           <div>
             <div className="flex items-center justify-between mb-2 px-1">
               <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-                Longitud del Ombligo (1 - 9)
+                Longitud del Ombligo 
               </label>
-              <span className="text-[10px] text-neutral-400 font-medium">Escala 1 al 9</span>
+              
             </div>
             <div className="flex items-center gap-3 bg-neutral-50 hover:bg-neutral-100/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-600/30 focus-within:border-emerald-600 rounded-2xl px-4 py-3.5 border border-neutral-200/80 transition-all">
               <Ruler className="w-5 h-5 text-[#1B4820]/70 flex-shrink-0" />
