@@ -4,6 +4,22 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.6-ui-animal-details-redesign] - 2026-09-11
+
+### Agregado y Modificado
+- **Rediseño Integral y Modernización de la Ficha de Detalles del Animal ([`DetailsTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/DetailsTab.jsx))**:
+  - **Lógica de Pureza Genética Específica vs. Mestizo**:
+    - Si el animal es de una raza pura (ej. *Brahman*, *Gyr*, *Holstein*), se muestra su porcentaje individual exacto (ej. `100%` con badge `Puro` si es ≥ 90%).
+    - Si el animal es **Mestizo**, se eliminó completamente el porcentaje global arbitrario. En su lugar se despliega el **desglose individual de cada raza** en badges (`breed_composition`), por ejemplo `50% Brahman · 50% Holstein`. Si no cuenta con proporciones guardadas, indica `Cruce mestizo (sin desglose específico)`.
+  - **Interfaz Moderna 100% Responsiva**:
+    - **Foto del Animal con Badges Flotantes**: Incorporados badges semitransparentes en cristal (*glassmorphism*) para el estado del animal (`Activo` con indicador pulsante o `Inactivo`) y el sexo (`Macho` / `Hembra` con iconos de `FaMars` y `FaVenus`).
+    - **Panel Rápido de Métricas**: Cuadrícula de 2x2 con tarjetas para *Peso Actual*, *Edad Estimada*, *Finca Asignada* y *Genética*.
+    - **Ficha Técnica Estilizada**: Módulo de datos estructurado en tarjetas individuales con micro-etiquetas en mayúsculas, tipografía robusta e iconografía SVG (`IdCard`, `Building2`, `Calendar`, `Palette`, `Dna`, `HeartHandshake`).
+    - **Mini-tarjetas Interactivas de Genealogía Directa**: Las tarjetas de Padre y Madre ahora muestran el número de arete, raza y enlace directo interactivo con icono `ArrowUpRight` para saltar al perfil del progenitor. Si no están registrados, muestra un estado limpio y discreto.
+    - **Botón de Edición Profesional**: Estilizado con color verde corporativo (`#1B4820`), respuesta táctil con `active:scale-95` y disposición responsiva tanto en barra fija de escritorio como en botón de acción móvil.
+
+---
+
 ## [1.2.5-ui-navel-length-input] - 2026-09-11
 
 ### Modificado
