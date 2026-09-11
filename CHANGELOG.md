@@ -4,6 +4,17 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.10-genealogy-breed-and-subtle-modernization] - 2026-09-11
+
+### Agregado y Modificado
+- **Modernización Sutil del Árbol Genealógico ([`GenealogyTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/GenealogyTab.jsx))**:
+  - **Visualización de Raza en Cada Animal**: En todos los niveles del árbol (Abuelos, Padres, Sujeto Actual, Hijos y Nietos) se incorporó un indicador estilizado y compacto con la raza del ejemplar (`animal.breed`), facilitando la trazabilidad genética de un vistazo.
+  - **Encabezado Institucional Estandarizado**: Se añadió la cabecera temática con icono vectorial `Share2`, título *"Árbol Genealógico"*, subtítulo descriptivo e indicador del código del animal (`#numero`), en armonía con las demás secciones.
+  - **Tarjeta Contenedora y Micro-interacciones**: Se enmarcó el árbol genealógico en una tarjeta blanca con esquinas redondeadas (`rounded-3xl`), micro-sombras e interactividad en los avatares (micro-zoom `hover:scale-105`), junto con insignias legibles en los conectores de nivel (`Padres`, `Hijos`, `Nietos`).
+  - **Navegación Directa a Detalles**: Al pulsar sobre cualquier miembro del árbol genealógico, el enlace ahora redirige directamente a la pestaña de detalles (`/inventario/perfil?id=${animal.id}&tab=details`).
+
+---
+
 ## [1.3.9-milking-tab-crud-and-tabs-text-size] - 2026-09-11
 
 ### Agregado y Modificado
