@@ -83,18 +83,8 @@ export default function EvolutionTab({ animal }) {
             <p className="text-xs text-neutral-400 font-medium">Historial cronológico de pesajes y desarrollo</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setIsCreateOpen(true)}
-            className="hidden md:flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-4 py-2.5 rounded-2xl shadow-xs text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Registrar Evento</span>
-          </button>
-          <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10">
-            #{animal.number}
-          </div>
+        <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10">
+          #{animal.number}
         </div>
       </div>
 
@@ -226,18 +216,48 @@ export default function EvolutionTab({ animal }) {
         )}
       </div>
 
-      {/* Botón Flotante para MÓVIL (FAB) */}
+      {/* Botón Flotante para MÓVIL (FAB) con animación suave */}
       <motion.button 
-        initial={{ opacity: 0, scale: 0.85, y: 10 }}
+        initial={{ opacity: 0, scale: 0.82, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        whileTap={{ scale: 0.93 }}
-        transition={{ duration: 0.2 }}
+        exit={{ opacity: 0, scale: 0.82, y: 12 }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 240, 
+          damping: 24, 
+          mass: 0.8,
+          delay: 0.08 
+        }}
+        whileTap={{ scale: 0.92 }}
         onClick={() => setIsCreateOpen(true)}
         className="fixed bottom-20 right-4 z-30 md:hidden flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-4 py-3 rounded-full shadow-[0_8px_25px_rgba(27,72,32,0.4)] border border-emerald-600/30 cursor-pointer text-xs uppercase tracking-wider backdrop-blur-xs"
         title="Registrar Evento"
+        aria-label="Registrar Evento"
       >
         <Plus className="w-4 h-4" />
         <span>Evento</span>
+      </motion.button>
+
+      {/* Botón Flotante Redondo con '+' para COMPUTADORA (DESKTOP) */}
+      <motion.button 
+        initial={{ opacity: 0, scale: 0.82, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.82, y: 12 }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 240, 
+          damping: 24, 
+          mass: 0.8,
+          delay: 0.08 
+        }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        onClick={() => setIsCreateOpen(true)}
+        className="fixed bottom-8 right-8 z-30 hidden md:flex items-center justify-center w-14 h-14 bg-[#1B4820] hover:bg-[#123316] text-white rounded-full shadow-[0_10px_30px_rgba(27,72,32,0.45)] border border-emerald-600/30 cursor-pointer transition-colors group"
+        title="Registrar Nuevo Evento"
+        aria-label="Registrar Nuevo Evento"
+      >
+        <Plus className="w-7 h-7 transition-transform group-hover:rotate-90 duration-300" strokeWidth={2.5} />
       </motion.button>
 
       {/* MODAL DE CREACIÓN DE EVENTO */}

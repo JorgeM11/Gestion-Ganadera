@@ -4,6 +4,20 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.2-ui-fab-smooth-and-desktop-round] - 2026-09-11
+
+### Agregado y Modificado
+- **Botón Flotante Redondo con '+' para Escritorio ([`EvolutionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/EvolutionTab.jsx))**:
+  - En resolución de computadora (`hidden md:flex`), el botón de registro de eventos ahora es un botón de acción flotante (FAB) perfectamente circular (`w-14 h-14 rounded-full`) ubicado en `bottom-8 right-8 z-30` con el icono de suma (`+`), sombra profunda, relieve verde corporativo y rotación sutil en hover (`group-hover:rotate-90`).
+  - Se removió el botón estático rectangular de la cabecera en escritorio para mantener la interfaz despejada y coherente.
+- **Suavizado de la Animación de Entrada del Botón Flotante (Móvil)**:
+  - **Eliminación de saltos por CSS Transform en Contenedor ([`PerfilAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/PerfilAnimal.jsx))**:
+    - Se reemplazó el desplazamiento `y: 10` en el contenedor dinámico de pestañas por una transición pura de opacidad (`crossfade`), previniendo que los elementos `fixed` alteren su contexto de posicionamiento y se desplacen de forma brusca durante el cambio de pestaña.
+  - **Micro-física Spring Suave en FABs ([`DetailsTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/DetailsTab.jsx) y [`EvolutionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/EvolutionTab.jsx))**:
+    - Los botones flotantes móviles ahora entran con una física elástica calibrada (`stiffness: 240, damping: 24, mass: 0.8`) y un ligero retraso armónico (`delay: 0.08`), asegurando una entrada orgánica y aterciopelada sin cortes ni parpadeos.
+
+---
+
 ## [1.3.1-ui-evolution-tab-modernization] - 2026-09-11
 
 ### Agregado y Modificado

@@ -377,10 +377,17 @@ export default function DetailsTab({ animal, onEdit }) {
 
         {/* Botón Flotante Editar para MÓVIL (FAB) */}
         <motion.button 
-          initial={{ opacity: 0, scale: 0.85, y: 10 }}
+          initial={{ opacity: 0, scale: 0.82, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          whileTap={{ scale: 0.93 }}
-          transition={{ duration: 0.2 }}
+          exit={{ opacity: 0, scale: 0.82, y: 12 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 240, 
+            damping: 24, 
+            mass: 0.8,
+            delay: 0.08 
+          }}
+          whileTap={{ scale: 0.92 }}
           onClick={onEdit}
           className="fixed bottom-20 right-4 z-30 md:hidden flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-4 py-3 rounded-full shadow-[0_8px_25px_rgba(27,72,32,0.4)] border border-emerald-600/30 cursor-pointer text-xs uppercase tracking-wider backdrop-blur-xs"
           title="Editar Animal"
