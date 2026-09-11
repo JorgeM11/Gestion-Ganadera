@@ -124,16 +124,6 @@ export default function DetailsTab({ animal, onEdit }) {
             <span className={`w-2 h-2 rounded-full ${animal.status === 'Inactivo' ? 'bg-red-400' : 'bg-emerald-400 animate-pulse'}`} />
             <span>{animal.status || 'Activo'}</span>
           </div>
-
-          {/* Badge Sexo */}
-          <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-xs border border-neutral-200/80 bg-white/95 text-neutral-800">
-            {isFemale ? (
-              <FaVenus className="w-3 h-3 text-pink-600" />
-            ) : (
-              <FaMars className="w-3 h-3 text-blue-600" />
-            )}
-            <span>{animal.sex || 'Macho'}</span>
-          </div>
         </div>
 
         {/* Identificador Principal */}
@@ -154,45 +144,25 @@ export default function DetailsTab({ animal, onEdit }) {
           </div>
         </div>
 
-        {/* Quick Stats Grid 2x2 */}
+        {/* Quick Stats Grid (Peso y Edad) */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white p-3.5 rounded-2xl shadow-2xs border border-neutral-100 flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-2xl shadow-2xs border border-neutral-100 flex flex-col justify-between">
             <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-              <Scale className="w-3.5 h-3.5 text-[#1B4820]" />
-              <span className="text-[9px] uppercase font-black tracking-wider text-neutral-400">Peso Actual</span>
+              <Scale className="w-4 h-4 text-[#1B4820]" />
+              <span className="text-[10px] uppercase font-black tracking-wider text-neutral-400">Peso Actual</span>
             </div>
-            <span className="text-xl font-black text-[#1B4820] tracking-tight">
+            <span className="text-2xl font-black text-[#1B4820] tracking-tight">
               {formatWeight(animal.last_weight_kg)}
             </span>
           </div>
 
-          <div className="bg-white p-3.5 rounded-2xl shadow-2xs border border-neutral-100 flex flex-col justify-between">
+          <div className="bg-white p-4 rounded-2xl shadow-2xs border border-neutral-100 flex flex-col justify-between">
             <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-              <Calendar className="w-3.5 h-3.5 text-[#1B4820]" />
-              <span className="text-[9px] uppercase font-black tracking-wider text-neutral-400">Edad Estimada</span>
+              <Calendar className="w-4 h-4 text-[#1B4820]" />
+              <span className="text-[10px] uppercase font-black tracking-wider text-neutral-400">Edad Estimada</span>
             </div>
-            <span className="text-sm font-black text-neutral-800 tracking-tight leading-snug">
+            <span className="text-lg font-black text-neutral-800 tracking-tight leading-snug">
               {calculateAge(animal.birth_date)}
-            </span>
-          </div>
-
-          <div className="bg-white p-3.5 rounded-2xl shadow-2xs border border-neutral-100 flex flex-col justify-between">
-            <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-              <Building2 className="w-3.5 h-3.5 text-[#1B4820]" />
-              <span className="text-[9px] uppercase font-black tracking-wider text-neutral-400">Finca</span>
-            </div>
-            <span className="text-sm font-black text-neutral-800 truncate" title={farm?.name || 'Sin finca asignada'}>
-              {farm?.name || 'Sin finca'}
-            </span>
-          </div>
-
-          <div className="bg-white p-3.5 rounded-2xl shadow-2xs border border-neutral-100 flex flex-col justify-between">
-            <div className="flex items-center gap-1.5 text-neutral-400 mb-1">
-              <Dna className="w-3.5 h-3.5 text-amber-700" />
-              <span className="text-[9px] uppercase font-black tracking-wider text-neutral-400">Genética</span>
-            </div>
-            <span className="text-sm font-black text-neutral-800 truncate">
-              {animal.breed === 'Mestizo' ? 'Cruce Mestizo' : `${animal.purity_percentage ?? 100}%`}
             </span>
           </div>
         </div>

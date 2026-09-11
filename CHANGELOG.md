@@ -4,6 +4,15 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.7-ui-clean-profile-hero] - 2026-09-11
+
+### Modificado
+- **Simplificación Visual del Hero en Ficha del Animal ([`DetailsTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/DetailsTab.jsx))**:
+  - Eliminado el badge de sexo flotante sobre la foto para mayor limpieza visual (la información de sexo permanece claramente visible en la ficha técnica detallada).
+  - Eliminadas las tarjetas de "Finca" y "Genética" del bloque inferior inmediato a la foto, dejando un par de métricas clave enfocado exclusivamente en **Peso Actual** y **Edad Estimada**.
+
+---
+
 ## [1.2.6-ui-animal-details-redesign] - 2026-09-11
 
 ### Agregado y Modificado
