@@ -4,6 +4,24 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.0-ui-fluid-animal-tabs] - 2026-09-11
+
+### Agregado y Modificado
+- **Animaciones Suaves y Fluidas en Navegación de Ficha del Animal ([`PerfilAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/PerfilAnimal.jsx))**:
+  - **Indicadores Deslizantes con Físicas Spring (`layoutId`)**:
+    - **Escritorio**: La barra de pestañas superior ahora cuenta con un indicador deslizante inferior animado con físicas de resorte (`type: "spring", stiffness: 480, damping: 36`), que viaja suavemente entre pestañas al hacer clic.
+    - **Móvil**: La barra inferior fija cuenta con una pastilla indicadora en la parte superior (`layoutId="mobileTabIndicator"`) y una sutil elevación/escala elástica sobre el icono activo (`scale: 1.15`).
+  - **Transición Fluida de Contenido Dinámico**:
+    - Se implementó `AnimatePresence mode="wait"` con `<motion.div>` en el contenedor dinámico de pestañas, logrando un desvanecimiento cruzado y desplazamiento vertical suave (`opacity`, `y`, curva cúbica `[0.22, 1, 0.36, 1]`) al alternar entre *Detalles*, *Evolución*, *Salud*, *Reproducción*, *Ordeño* y *Genealogía*.
+  - **Transición del Título de Cabecera**:
+    - El título principal de la vista transiciona armónicamente con micro-desvanecimiento al cambiar de sección.
+  - **Sincronización Silenciosa de URL**:
+    - Se integró `handleTabChange` con `setSearchParams(..., { replace: true })` para mantener la URL sincronizada con la pestaña activa sin saturar el historial de navegación.
+- **Sub-pestañas en Módulo de Reproducción ([`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx))**:
+  - Implementada pastilla de fondo deslizante (`layoutId="reproductionSubTabActive"`) y transiciones de entrada/salida suaves entre *Partos*, *Palpación* y *Servicios*.
+
+---
+
 ## [1.2.9-ui-mobile-fab-edit] - 2026-09-11
 
 ### Agregado y Modificado

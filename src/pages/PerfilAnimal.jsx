@@ -16,16 +16,25 @@ import MilkingTab from '@/components/MilkingTab';
 // UI Components
 import BottomSheet from '@/components/ui/BottomSheet';
 import AnimalForm from '@/components/inventario/AnimalForm';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function ProfileContent() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   // CAPTURAMOS EL ID Y EL TAB DIRECTAMENTE DE LA URL (?id=...&tab=...)
   const animalId = searchParams.get("id"); 
   const initialTab = searchParams.get("tab") || 'details';
   
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleTabChange = useCallback((tabId) => {
+    setActiveTab(tabId);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', tabId);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   // --- SISTEMA DE MODAL RECURSIVO (idéntico a NuevoAnimal.jsx) ---
   const [modalStack, setModalStack] = useState([]);
@@ -105,56 +114,108 @@ function ProfileContent() {
         <Link to="/inventario" className="p-2 -ml-2 hover:bg-neutral-200 rounded-full transition-colors cursor-pointer">
           <ArrowLeft className="w-6 h-6 text-[#1B4820]" />
         </Link>
-        <h1 className="text-xl font-bold text-[#1B4820]">
-          {activeTab === 'details' ? 'Ficha del Animal' :
-            activeTab === 'evolution' ? 'Evolución del Animal' :
-              activeTab === 'health' ? 'Carnet de Salud' :
-                activeTab === 'reproduction' ? 'Registro Reproductivo' :
-                  activeTab === 'milking' ? 'Control de Ordeño' : 'Genealogía'}
-        </h1>
+        <div className="overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.h1 
+              key={activeTab}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.16, ease: "easeOut" }}
+              className="text-xl font-bold text-[#1B4820]"
+            >
+              {activeTab === 'details' ? 'Ficha del Animal' :
+                activeTab === 'evolution' ? 'Evolución del Animal' :
+                  activeTab === 'health' ? 'Carnet de Salud' :
+                    activeTab === 'reproduction' ? 'Registro Reproductivo' :
+                      activeTab === 'milking' ? 'Control de Ordeño' : 'Genealogía'}
+            </motion.h1>
+          </AnimatePresence>
+        </div>
       </header>
 
       <div className="max-w-6xl mx-auto">
         {/* NAVEGACIÓN DESKTOP */}
-        <nav className="hidden md:flex items-center justify-center gap-8 border-b border-neutral-200 mb-6 px-8 sticky top-[72px] bg-[#F7F7F2] z-20 pt-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex items-center cursor-pointer gap-2 pb-3 -mb-[2px] transition-colors border-b-2 font-bold uppercase tracking-widest text-xs ${activeTab === item.id ? 'text-[#1B4820] border-[#1B4820]' : 'text-neutral-400 border-transparent hover:text-[#1B4820]'
+        <nav className="hidden md:flex items-center justify-center gap-4 border-b border-neutral-200 mb-6 px-4 sticky top-[72px] bg-[#F7F7F2]/95 backdrop-blur-xs z-20 pt-2">
+          {navItems.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleTabChange(item.id)}
+                className={`relative flex items-center cursor-pointer gap-2 pb-3.5 pt-1 px-4 transition-colors font-bold uppercase tracking-widest text-xs ${
+                  isActive ? 'text-[#1B4820]' : 'text-neutral-400 hover:text-[#1B4820]'
                 }`}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </button>
-          ))}
+              >
+                <item.icon className="w-4 h-4" />
+                <span>{item.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="desktopTabIndicator"
+                    className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#1B4820] rounded-full shadow-[0_1px_4px_rgba(27,72,32,0.3)]"
+                    transition={{ type: "spring", stiffness: 480, damping: 36 }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         {/* CONTENIDO DINÁMICO */}
         <div className="px-4">
-          {activeTab === 'details' && <DetailsTab animal={animal} onEdit={() => setIsEditModalOpen(true)} />}
-          {activeTab === 'evolution' && <EvolutionTab animal={animal} />}
-          {activeTab === 'health' && <HealthTab animal={animal} />}
-          {activeTab === 'reproduction' && <ReproductionTab animal={animal} />}
-          {activeTab === 'milking' && <MilkingTab animal={animal} />}
-          {activeTab === 'genealogy' && <GenealogyTab animal={animal} />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {activeTab === 'details' && <DetailsTab animal={animal} onEdit={() => setIsEditModalOpen(true)} />}
+              {activeTab === 'evolution' && <EvolutionTab animal={animal} />}
+              {activeTab === 'health' && <HealthTab animal={animal} />}
+              {activeTab === 'reproduction' && <ReproductionTab animal={animal} />}
+              {activeTab === 'milking' && <MilkingTab animal={animal} />}
+              {activeTab === 'genealogy' && <GenealogyTab animal={animal} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 
       {/* BOTTOM NAV (Móvil) */}
-      <nav className="fixed bottom-0 w-full bg-white border-t border-neutral-200 px-4 py-3 md:hidden z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <nav className="fixed bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-neutral-200 px-3 py-2 md:hidden z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
         <div className="flex justify-between items-center max-w-sm mx-auto">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center gap-1 flex-1 transition-colors cursor-pointer ${activeTab === item.id ? 'text-[#1B4820]' : 'text-neutral-400'
+          {navItems.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleTabChange(item.id)}
+                className={`relative flex flex-col items-center gap-1 flex-1 py-1 transition-colors cursor-pointer ${
+                  isActive ? 'text-[#1B4820]' : 'text-neutral-400 hover:text-neutral-600'
                 }`}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              <span className="text-[8px] font-bold uppercase tracking-wider text-center whitespace-nowrap">{item.label}</span>
-            </button>
-          ))}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="mobileTabIndicator"
+                    className="absolute -top-2 w-7 h-1 bg-[#1B4820] rounded-full shadow-[0_1px_4px_rgba(27,72,32,0.3)]"
+                    transition={{ type: "spring", stiffness: 480, damping: 36 }}
+                  />
+                )}
+                <motion.div
+                  animate={{ scale: isActive ? 1.15 : 1, y: isActive ? -1 : 0 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                >
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                </motion.div>
+                <span className={`text-[8px] uppercase tracking-wider text-center whitespace-nowrap transition-all ${
+                  isActive ? 'font-black text-[#1B4820]' : 'font-semibold text-neutral-400'
+                }`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </nav>
 

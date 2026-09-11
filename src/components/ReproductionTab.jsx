@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Baby, Stethoscope, Syringe } from 'lucide-react';
 import { GiCow } from 'react-icons/gi'; // <-- NUEVO: Icono de Vaca moderno y limpio
 import { FaVenusMars } from 'react-icons/fa6';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import PartosTab from './reproduction/PartosTab';
 import TactosTab from './reproduction/TactosTab';
@@ -18,30 +19,52 @@ export default function ReproductionTab({ animal }) {
   ];
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-
+    <div>
       {/* Sub-Navegación Pills */}
       <div className="flex items-center justify-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-        {subTabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveSubTab(tab.id)}
-            className={`flex flex-row items-center cursor-pointer justify-center gap-1.5 px-2 py-2.5 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === tab.id
-              ? 'bg-[#1B4820] text-white shadow-md'
-              : 'bg-white text-gray-500 border border-neutral-200 hover:bg-neutral-50'
+        {subTabs.map((tab) => {
+          const isActive = activeSubTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              className={`relative flex flex-row items-center cursor-pointer justify-center gap-1.5 px-3.5 py-2 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-colors whitespace-nowrap ${
+                isActive
+                  ? 'text-white'
+                  : 'bg-white text-gray-500 border border-neutral-200 hover:bg-neutral-50'
               }`}
-          >
-            <tab.icon size={16} strokeWidth={2.5} />
-            {tab.label}
-          </button>
-        ))}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="reproductionSubTabActive"
+                  className="absolute inset-0 bg-[#1B4820] rounded-full shadow-md -z-0"
+                  transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5">
+                <tab.icon size={16} strokeWidth={2.5} />
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Vistas */}
       <div className="space-y-4">
-        {activeSubTab === 'partos' && <PartosTab animalId={animalId} />}
-        {activeSubTab === 'tactos' && <TactosTab animal={animal} />}
-        {activeSubTab === 'servicios' && <ServiciosTab animal={animal} />}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSubTab}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {activeSubTab === 'partos' && <PartosTab animalId={animalId} />}
+            {activeSubTab === 'tactos' && <TactosTab animal={animal} />}
+            {activeSubTab === 'servicios' && <ServiciosTab animal={animal} />}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
     </div>
