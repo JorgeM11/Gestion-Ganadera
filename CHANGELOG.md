@@ -8,6 +8,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 
 ### Agregado y Modificado
 - **Módulo de Ordeño - Edición y Eliminación ([`MilkingTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/MilkingTab.jsx), [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx), [`milkingUtils.js`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/lib/milkingUtils.js))**:
+  - **Remoción del Botón Estático Anterior**: Se eliminó la tarjeta/banner redundante con el botón "Registrar Ordeño" en favor del nuevo encabezado estandarizado (`Control de Ordeño`, `#numero`) y los botones flotantes de acción.
   - **Edición y Eliminación de Registros**: En cada fila del historial de pesajes de leche se añadieron botones de acción directa (`Pencil` y `Trash2`).
   - **Edición en Modal**: [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx) ahora soporta tanto creación como edición de registros de ordeño, precargando fecha, turno, litros y observaciones, e invocando la nueva función `updateMilkingRecord`.
   - **Eliminación Segura con Modal de Confirmación**: Se integró [`ConfirmDialog.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/ConfirmDialog.jsx) con `isDanger={true}`, advirtiendo antes de eliminar y aplicando soft-delete atómico en Dexie y encolamiento offline (`PATCH`) con `deleteMilkingRecord`.

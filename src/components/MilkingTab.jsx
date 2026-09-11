@@ -76,7 +76,23 @@ export default function MilkingTab({ animal }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-28 sm:pb-12 relative">
+    <div className="max-w-3xl mx-auto space-y-6 pb-28 sm:pb-12 relative">
+      {/* 1. TÍTULO DE SECCIÓN */}
+      <div className="mb-2 px-1 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-[#EEF7EE] text-[#1B4820] rounded-2xl border border-[#1B4820]/10 shadow-2xs">
+            <Milk className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1B4820] leading-tight">Control de Ordeño</h2>
+            <p className="text-xs text-neutral-400 font-medium">Historial y pesadas de cada turno</p>
+          </div>
+        </div>
+        <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10 shadow-2xs">
+          #{animal?.number}
+        </div>
+      </div>
+
       {/* TARJETAS RESUMEN DE PRODUCCIÓN */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white p-4 rounded-2xl shadow-xs border border-neutral-100 flex flex-col justify-between">
@@ -110,22 +126,6 @@ export default function MilkingTab({ animal }) {
             <span className="text-xs font-bold text-neutral-500">días</span>
           </div>
         </div>
-      </div>
-
-      {/* BOTÓN DE ACCIÓN / BANNER */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-neutral-100 shadow-xs">
-        <div>
-          <h3 className="text-sm font-bold text-neutral-900">Control de Leche</h3>
-          <p className="text-xs text-neutral-500">Registra las pesadas de cada turno</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-[#1B4820] hover:bg-[#133517] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Registrar Ordeño</span>
-        </button>
       </div>
 
       {/* LISTADO DE ORDEÑOS */}
