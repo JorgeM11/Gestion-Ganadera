@@ -14,7 +14,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { addToSyncQueue, runFullSync } from '@/lib/syncUtils';
 import { compressImage } from '@/lib/imageUtils';
-import { calculateOffspringGenetics, POPULAR_BREEDS, formatGeneticsLabel } from '@/lib/geneticsUtils';
+import { calculateOffspringGenetics, POPULAR_BREEDS } from '@/lib/geneticsUtils';
 import GenealogySelector from './GenealogySelector';
 import FarmModal from './FarmModal';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -175,20 +175,67 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
       const father = fatherId ? await db.animals.get(fatherId) : null;
       const mother = motherId ? await db.animals.get(motherId) : null;
 
-      if (father || mother) {
-        const calculated = calculateOffspringGenetics(father, mother);
-        setGeneticSuggestion(calculated);
+      if (!father && !mother) {
+        setGeneticSuggestion(null);
+        return;
+      }
 
-        // Si es animal nuevo y no tiene raza fija por usuario, auto-asignar
-        if (!initialValues?.id) {
-          setValue('breed', calculated.breed);
-          setValue('purity_percentage', calculated.purity_percentage);
-          setValue('breed_composition', calculated.breed_composition);
+      const calculated = calculateOffspringGenetics(father, mother);
+
+      // Si es animal nuevo y no tiene raza fija modificada por el usuario, auto-asignar
+      if (!initialValues?.id) {
+        if (!dirtyFields.breed) {
+          setValue('breed', calculated.breed, { shouldDirty: false });
+          setValue('purity_percentage', calculated.purity_percentage, { shouldDirty: false });
+          setValue('breed_composition', calculated.breed_composition, { shouldDirty: false });
+          setGeneticSuggestion(null);
+          return;
         }
       }
+
+      // Comprobar si la genética calculada YA coincide con la actual del formulario
+      const currentBreed = selectedBreed || 'Mestizo';
+      const isSameBreed = currentBreed === calculated.breed;
+      let isSameGenetics = false;
+
+      if (isSameBreed) {
+        if (calculated.breed !== 'Mestizo') {
+          const p1 = Math.round(Number(selectedPurity ?? 100));
+          const p2 = Math.round(Number(calculated.purity_percentage ?? 100));
+          isSameGenetics = Math.abs(p1 - p2) <= 1;
+        } else {
+          const comp1 = breedComposition || {};
+          const comp2 = calculated.breed_composition || {};
+          const keys1 = Object.keys(comp1).filter(k => Number(comp1[k]) > 0);
+          const keys2 = Object.keys(comp2).filter(k => Number(comp2[k]) > 0);
+          isSameGenetics = keys1.length === keys2.length && 
+            keys1.every(k => Math.round(Number(comp1[k])) === Math.round(Number(comp2[k])));
+        }
+      }
+
+      // Si ya está aplicada, nunca mostrar la recomendación
+      if (isSameGenetics) {
+        setGeneticSuggestion(null);
+        return;
+      }
+
+      // En modo edición: si los padres son los que ya tenía el animal y no han cambiado en esta sesión
+      const isOriginalParents = Boolean(
+        initialValues?.id && 
+        fatherId === (initialValues.father_id || null) && 
+        motherId === (initialValues.mother_id || null)
+      );
+
+      if (isOriginalParents) {
+        setGeneticSuggestion(null);
+        return;
+      }
+
+      // Solo sugerir si los padres fueron cambiados y difiere de lo actual
+      setGeneticSuggestion(calculated);
     };
     computeGenetics();
-  }, [fatherId, motherId, initialValues, setValue]);
+  }, [fatherId, motherId, initialValues, selectedBreed, selectedPurity, breedComposition, setValue, dirtyFields]);
 
   const handleApplySuggestion = () => {
     if (!geneticSuggestion) return;
@@ -727,20 +774,15 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
 
       {/* 3. RAZA Y CARACTERÍSTICAS GENÉTICAS (DEBAJO DE GENEALOGÍA) */}
       <section className="bg-amber-50/40 rounded-3xl p-5 mb-4 border border-amber-200/60 shadow-2xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-6 rounded-full bg-amber-600"></div>
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-neutral-900 flex items-center gap-1.5">
-                <Dna className="w-4 h-4 text-amber-600" />
-                Raza y Genética
-              </h3>
-              <p className="text-[11px] text-neutral-500 font-medium">Clasificación racial y pureza</p>
-            </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-1.5 h-6 rounded-full bg-amber-600"></div>
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-neutral-900 flex items-center gap-1.5">
+              <Dna className="w-4 h-4 text-amber-600" />
+              Raza y Genética
+            </h3>
+            <p className="text-[11px] text-neutral-500 font-medium">Clasificación racial y pureza</p>
           </div>
-          <span className="text-xs font-bold text-amber-800 bg-amber-100/90 px-3 py-1 rounded-full border border-amber-200">
-            {formatGeneticsLabel(selectedBreed, selectedPurity, breedComposition)}
-          </span>
         </div>
 
         {/* Banner de sugerencia genética automática con AnimatePresence (Desaparece al Aplicar) */}

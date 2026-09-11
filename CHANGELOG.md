@@ -4,6 +4,17 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.8-ui-form-genetics-and-pill-cleanup] - 2026-09-11
+
+### Corregido y Modificado
+- **Optimización de Sugerencia Genética en Modal de Edición ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - Al abrir el modal de edición de un animal existente, el sistema ya no vuelve a mostrar el banner de recomendación genética si la genética calculada ya coincide con la que el animal tiene aplicada o si los progenitores no han sido modificados durante la sesión.
+  - La sugerencia únicamente se activa cuando el usuario cambia activamente a otro padre o madre y el nuevo cruce difiere de la raza/composición actual.
+- **Eliminación de la Pill de Selección en Encabezado de Raza**:
+  - Se eliminó el badge flotante redundante (`formatGeneticsLabel`) en la cabecera de la sección *Raza y Genética* tanto en el formulario de creación como en el de edición, dejando un encabezado limpio y minimalista.
+
+---
+
 ## [1.2.7-ui-clean-profile-hero] - 2026-09-11
 
 ### Modificado
