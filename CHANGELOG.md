@@ -4,6 +4,19 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.4-fix-edit-modal-and-birth-icon] - 2026-09-11
+
+### Corregido y Modificado
+- **Corrección de Apilamiento (Z-Index) en Modales ([`BottomSheet.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/BottomSheet.jsx))**:
+  - Resuelto el problema donde al abrir el modal de edición de animal ("Editar Animal" desde el perfil), la pantalla se difuminaba completamente y bloqueaba cualquier interacción.
+  - La causa era que el contenedor del modal no contaba con un `z-index` base asignado (quedando en `auto` / 0), mientras que el backdrop con `backdrop-blur-xs` se renderizaba con `z-index: 49`, colocándose por encima del modal e interceptando todos los clics.
+  - Se implementó la asignación dinámica obligatoria `baseZIndex` (50 por defecto) para el contenedor y `baseZIndex - 1` (49) para el backdrop, garantizando que el modal siempre se posicione física y visualmente por encima de su difuminado.
+  - En [`PerfilAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/PerfilAnimal.jsx), se ajustó el z-index de la pila recursiva `modalStack` a `60 + index * 10` para apilar correctamente los modales de creación de progenitores sobre el modal de edición base.
+- **Icono de Evento Nacimiento ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - Sustituido el icono genérico de bebé (`Baby`) por el icono de ganado vacuno [`GiCow`](https://react-icons.github.io/react-icons/icons/gi/) de `react-icons/gi`, alineándose con la temática ganadera y guardando total consistencia con el resto del módulo de reproducción y partos.
+
+---
+
 ## [1.2.3-ui-animal-form] - 2026-09-11
 
 ### Agregado y Modificado

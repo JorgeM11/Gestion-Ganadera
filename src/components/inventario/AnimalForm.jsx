@@ -6,8 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Camera, Save, X, ChevronUp, ChevronDown, Trash2, Plus, 
   CheckCircle, TriangleAlert, Building2, Sparkles, Dna, 
-  Baby, Milk, Scale, Info 
+  Milk, Scale, Info 
 } from 'lucide-react';
+import { GiCow } from 'react-icons/gi';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db } from '@/lib/db';
@@ -814,7 +815,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
                 </div>
               ) : (
                 <p className="text-xs text-neutral-500 font-medium italic">
-                  Cruce mestizo general (las proporciones se definen por los progenitores)
+                  Cruce mestizo general 
                 </p>
               )}
             </div>
@@ -883,8 +884,8 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-6 rounded-full bg-emerald-600"></div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-[#1B4820] flex items-center gap-1.5">
-                <Baby className="w-4 h-4 text-emerald-600" />
+              <h3 className="text-base sm:text-lg font-bold text-[#1B4820] flex items-center gap-2">
+                <GiCow className="w-5 h-5 text-emerald-600" />
                 Evento: Nacimiento
               </h3>
               <p className="text-[11px] text-neutral-400 font-medium">Pesaje inicial y datos del parto</p>

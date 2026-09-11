@@ -53,6 +53,10 @@ export default function BottomSheet({
     exit: { opacity: 0, scale: 0.92, y: '-46%', x: '-50%' }
   };
 
+  const baseZIndex = (style && typeof style.zIndex === 'number') ? style.zIndex : 50;
+  const backdropZIndex = baseZIndex - 1;
+  const containerStyle = { ...style, zIndex: baseZIndex };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -64,7 +68,7 @@ export default function BottomSheet({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeInOut' }}
             onClick={onClose}
-            style={{ zIndex: (style?.zIndex ? style.zIndex - 1 : 49) }}
+            style={{ zIndex: backdropZIndex }}
             className="fixed inset-0 bg-black/60 backdrop-blur-xs cursor-pointer"
           />
 
@@ -86,7 +90,7 @@ export default function BottomSheet({
                 onClose();
               }
             }}
-            style={style}
+            style={containerStyle}
             className={`fixed flex flex-col bg-white shadow-2xl overflow-hidden
               ${isDesktop 
                 ? 'top-1/2 left-1/2 w-[95%] max-w-lg max-h-[85dvh] rounded-3xl' 

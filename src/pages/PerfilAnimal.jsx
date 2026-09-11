@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, List, TrendingUp, ShieldPlus, Share2, Baby, Loader2, Milk } from 'lucide-react';
+import { ArrowLeft, List, TrendingUp, ShieldPlus, Share2, Loader2, Milk } from 'lucide-react';
 import { FaVenusMars } from 'react-icons/fa6';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
@@ -183,7 +183,7 @@ function ProfileContent() {
             onClose={handleCloseModal}
             title={`Registrar ${modal.sex === 'Macho' ? 'Padre' : 'Madre'}`}
             description="Completa los datos mínimos para identificar al progenitor."
-            style={{ zIndex: 50 + index * 10 }}
+            style={{ zIndex: 60 + index * 10 }}
           >
             <AnimalForm 
               isModal
