@@ -429,7 +429,7 @@ export default function HealthTab({ animal }) {
         isOpen={!!recordToDelete}
         title="¿Eliminar registro médico?"
         description={`¿Estás seguro de que deseas eliminar la aplicación de "${recordToDelete?.product_name}" del ${recordToDelete?.application_date ? formatShortDateLocal(recordToDelete.application_date) : ''}? Esta acción se sincronizará en todos tus dispositivos.`}
-        confirmText="Eliminar Tratamiento"
+        confirmText="Eliminar"
         cancelText="Conservar"
         isDanger
         onConfirm={handleDeleteRecord}

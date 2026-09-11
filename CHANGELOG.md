@@ -4,6 +4,34 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.6-ui-reproduction-tab-modernization] - 2026-09-11
+
+### Agregado y Modificado
+- **Modernización Integral del Módulo Reproductivo ([`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx))**:
+  - **Encabezado Institucional y Métricas Reproductivas**:
+    - Cabecera con insignia vectorial `FaVenusMars` y código del animal (`#numero`).
+    - Panel de control con 3 métricas en tiempo real: total de crías/partos registrados, diagnóstico reproductivo actual (palpación más reciente con indicador verde/rojo) y último servicio (tipo y fecha).
+  - **Sub-navegación Inteligente en Píldoras**:
+    - Badges numéricos reactivos en cada sub-pestaña (`Partos`, `Palpación`, `Servicios`) con indicador animado y fluidos cambios de vista.
+- **Rediseño Completo de Partos ([`PartosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/PartosTab.jsx))**:
+  - Tarjetas de crías con avatar de sexo (`FaMars` / `FaVenus`), raza, fecha de parto, peso al nacer y botón de acción directa "Ver Ficha" con enlace al perfil individual de la cría.
+  - Estado vacío con llamado a la acción para registrar partos.
+  - Soporte en [`NuevoAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/NuevoAnimal.jsx) para recibir `?mother_id=` y pre-vincular a la madre automáticamente al registrar una cría.
+- **Modernización de Palpaciones ([`TactosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/TactosTab.jsx))**:
+  - Tarjetas con estado clínico de preñez (`Preñada` / `Vacía`), fechas formateadas y observaciones.
+  - Creación y edición directa en modal [`BottomSheet`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/BottomSheet.jsx) con [`TactoForm`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/TactoForm.jsx) sin recargar ni abandonar la página.
+  - Eliminación segura con [`ConfirmDialog`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/ConfirmDialog.jsx) y sincronización offline.
+- **Modernización de Servicios ([`ServiciosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/ServiciosTab.jsx))**:
+  - Tarjetas con tipo de concepción (`Inseminación Artificial` / `Monta Natural`), fecha y enlace directo al toro/padre asignado.
+  - Creación y edición directa en modal con [`ServicioForm`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/ServicioForm.jsx).
+  - Eliminación con modal de confirmación y sincronización offline.
+- **Coherencia de Botones Flotantes (FABs) en Móvil y Desktop**:
+  - En cada una de las 3 sub-pestañas:
+    - **Móvil (`md:hidden`)**: Botón flotante píldora en `bottom-20 right-4 z-30` con texto específico (`Parto`, `Palpación`, `Servicio`).
+    - **Escritorio (`hidden md:flex`)**: Botón circular `w-14 h-14` en `bottom-8 right-8 z-30` con animación de giro de cruz (`+`) al interactuar.
+
+---
+
 ## [1.3.5-ui-health-tab-modernization] - 2026-09-11
 
 ### Agregado y Modificado

@@ -1,5 +1,5 @@
-import React, { useState, useCallback, Suspense } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useMemo, Suspense } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import AnimalForm from '@/components/inventario/AnimalForm';
 import BottomSheet from '@/components/ui/BottomSheet';
@@ -8,6 +8,13 @@ import { AnimatePresence } from 'framer-motion';
 // 1. SEPARAMOS EL CONTENIDO DEL FORMULARIO
 function NuevoAnimalContent() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const motherId = searchParams.get('mother_id');
+  
+  const initialValues = useMemo(() => {
+    if (!motherId) return undefined;
+    return { mother_id: motherId };
+  }, [motherId]);
   
   // Cada elemento: { id: string, sex: 'Macho'|'Hembra', onSelect: (id) => void }
   const [modalStack, setModalStack] = useState([]);
@@ -63,6 +70,7 @@ function NuevoAnimalContent() {
       {/* FORMULARIO BASE */}
       <div className="max-w-2xl mx-auto px-4 mt-6">
         <AnimalForm 
+          initialValues={initialValues}
           onCancel={() => navigate('/inventario')}
           onSubmitSuccess={() => navigate('/inventario')}
           onOpenModal={handleOpenModal}
