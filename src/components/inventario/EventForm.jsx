@@ -12,14 +12,15 @@ import {
   AlertTriangle,
   Loader2,
   Info,
-  Trash2
+  Trash2,
+  Scale
 } from "lucide-react";
 
 // Importaciones Core
 import { db } from "@/lib/db";
 import { supabase } from "@/lib/supabaseClient";
 import { addToSyncQueue, runFullSync } from "@/lib/syncUtils";
-import { compressImage } from "@/lib/imageUtils"; // <-- Eliminamos uploadImageToSupabase
+import { compressImage } from "@/lib/imageUtils";
 import AnimalImage from "@/components/inventario/AnimalImage";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { DateInput } from '@/components/ui/DateInput';
@@ -35,31 +36,18 @@ export default function EventForm({
   const isEditing = !!initialValues?.id;
 
   // --- OPCIONES ---
-  const tipoOpciones = ["Destete", "Peso a los 12 meses", "Peso a los 18 meses", "Otro"];
-  const largoOpciones = [
-    { value: "", label: "No especificado" },
-    { value: "1", label: "1" },
-    { value: "2", label: "2" },
-    { value: "3", label: "3" },
-    { value: "4", label: "4" },
-    { value: "5", label: "5" },
-    { value: "6", label: "6" },
-    { value: "7", label: "7" },
-    { value: "8", label: "8" },
-    { value: "9", label: "9" }
-  ];
+  const tipoOpciones = ["Nacimiento", "Destete", "Peso a los 12 meses", "Peso a los 18 meses", "Otro"];
+  const knownTypes = ["Nacimiento", "Destete", "Peso a los 12 meses", "Peso a los 18 meses"];
 
   // --- ESTADOS REACT ---
   const [tipoEvento, setTipoEvento] = useState(() => {
     if (!initialValues) return "Destete";
-    const knownTypes = ["Destete", "Peso a los 12 meses", "Peso a los 18 meses"];
     if (knownTypes.includes(initialValues.event_type)) return initialValues.event_type;
     return "Otro";
   });
 
   const [eventoPersonalizado, setEventoPersonalizado] = useState(() => {
     if (!initialValues) return "";
-    const knownTypes = ["Destete", "Peso a los 12 meses", "Peso a los 18 meses"];
     return knownTypes.includes(initialValues.event_type) ? "" : initialValues.event_type;
   });
 
@@ -70,7 +58,6 @@ export default function EventForm({
   const [showToast, setShowToast] = useState(false);
 
   const [isTipoOpen, setIsTipoOpen] = useState(false);
-  const [isLargoOpen, setIsLargoOpen] = useState(false);
 
   const [photoPreview, setPhotoPreview] = useState(() => {
     // FASE 2: Prioridad absoluta al binario local para modo Offline
@@ -94,7 +81,12 @@ export default function EventForm({
     },
   });
 
-  const selectedLargo = watch("largoViril");
+  // --- REGLAS CONDICIONALES DE VISIBILIDAD ---
+  const currentEventType = tipoEvento === "Otro" && eventoPersonalizado ? eventoPersonalizado : tipoEvento;
+  const isNacimiento = currentEventType?.trim().toLowerCase() === 'nacimiento';
+  const isFemale = animal?.sex === 'Hembra';
+  // Ocultar Circunferencia Escrotal si está seleccionado Nacimiento o si es hembra
+  const showScrotal = !isNacimiento && !isFemale;
 
   // --- SINCRONIZACIÓN DE FOTO (MODO EDICIÓN) ---
   useEffect(() => {
@@ -109,7 +101,7 @@ export default function EventForm({
 
   // --- LÓGICA DE DUPLICADOS ---
   const isDuplicateBlocked = useMemo(() => {
-    const uniqueEvents = ['Destete'];
+    const uniqueEvents = ['Nacimiento', 'Destete'];
     if (!uniqueEvents.includes(tipoEvento)) return false;
     return existingEvents?.some(e => e.event_type === tipoEvento && e.id !== initialValues?.id);
   }, [tipoEvento, existingEvents, initialValues]);
@@ -129,6 +121,16 @@ export default function EventForm({
 
   const preventInvalidNumberKeys = (e) => {
     if (['+', '-', 'e', 'E', '*', '/', '{', '}', 'ñ', 'Ñ'].includes(e.key) || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+    }
+  };
+
+  // Restricción para Longitud de Ombligo (solo texto del 1 al 9)
+  const handleNavelKeyDown = (e) => {
+    if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Escape', 'Enter'].includes(e.key)) {
+      return;
+    }
+    if (!/^[1-9]$/.test(e.key)) {
       e.preventDefault();
     }
   };
@@ -206,9 +208,9 @@ export default function EventForm({
         event_date: data.fechaEvento,
         weight_kg: data.pesoCria ? parseFloat(data.pesoCria) : null,
         mother_weight_kg: data.pesoVaca ? parseFloat(data.pesoVaca) : null,
-        scrotal_circumference_cm: data.circunferencia ? parseFloat(data.circunferencia) : null,
-        navel_length: data.largoViril || null,
-        observations: data.observations || null,
+        scrotal_circumference_cm: showScrotal && data.circunferencia ? parseFloat(data.circunferencia) : null,
+        navel_length: data.largoViril ? data.largoViril.trim() : null,
+        observations: data.observaciones || null,
         photo_path: isPhotoModified ? null : (isEditing ? initialValues.photo_path : null),
         photo_blob: photoBlob || (isEditing && !isPhotoModified ? initialValues.photo_blob : null),
         created_at: isEditing ? initialValues.created_at : now,
@@ -226,14 +228,16 @@ export default function EventForm({
           syncOps.push({ table_name: 'growth_events', operation: 'INSERT', payload: eventData, created_at: now, status: 'PENDING' });
         }
 
-        // Sincronizar fecha de nacimiento si es un evento de Nacimiento para actualizar la edad en la ficha
+        // Sincronizar fecha y peso de nacimiento si es un evento de Nacimiento para actualizar la edad y peso en la ficha
         if (eventData.event_type === 'Nacimiento') {
           const animalUpdate = {
             birth_date: eventData.event_date,
             updated_at: now
           };
+          if (eventData.weight_kg) {
+            animalUpdate.birth_weight_kg = eventData.weight_kg;
+          }
           await db.animals.update(animal.id, animalUpdate);
-          // PATCH parcial: marcamos _partial_update para que processSyncQueue use UPDATE en vez de upsert
           syncOps.push({
             table_name: 'animals',
             operation: 'PATCH',
@@ -253,11 +257,10 @@ export default function EventForm({
       }
 
       setShowToast(true);
-      // --- CAMBIO UX: Cerrar rápido en 500ms ---
       setTimeout(() => {
         setShowToast(false);
         onSubmitSuccess();
-      }, 500);
+      }, 400);
 
     } catch (err) {
       console.error('Error guardando evento:', err);
@@ -268,73 +271,79 @@ export default function EventForm({
   };
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-5">
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed z-[100] px-5 py-4 bg-[#1A3621] text-white rounded-2xl shadow-xl transition-all animate-in fade-in slide-in-from-top-5 top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:-translate-x-0 font-bold text-sm flex items-center gap-3 w-[90%] max-w-sm sm:w-auto">
-          <CheckCircle className="w-6 h-6 text-emerald-400" />
-          {isEditing ? 'Evento de vida actualizado' : 'Evento de vida registrado exitosamente'}
+        <div className="fixed z-[100] px-5 py-3.5 bg-[#1B4820] text-white rounded-2xl shadow-xl transition-all animate-in fade-in slide-in-from-top-5 top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:-translate-x-0 font-bold text-sm flex items-center gap-3 w-[90%] max-w-sm sm:w-auto border border-emerald-500/30">
+          <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+          <span>{isEditing ? 'Evento actualizado exitosamente' : 'Evento registrado exitosamente'}</span>
         </div>
       )}
 
-      {/* Hero Card Dinámico */}
+      {/* Hero Card Dinámico (Modo Página Completa) */}
       {!isModal && (
-        <div className="relative w-full h-48 rounded-[2.5rem] overflow-hidden shadow-2xl bg-black group">
+        <div className="relative w-full h-44 rounded-3xl overflow-hidden shadow-sm bg-neutral-900 group">
           <AnimalImage 
             photoPath={animal.photo_path} 
             photoBlob={animal.photo_blob} 
             alt={`#${animal.number}`}
-            className="w-full h-full transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-          <div className="absolute bottom-6 left-7 flex flex-col gap-0.5">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-white">
-              ID ANIMAL: {animal.number}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+          <div className="absolute bottom-5 left-6 flex flex-col gap-0.5">
+            <span className="text-[10px] uppercase font-black tracking-widest text-emerald-400">
+              Animal #{animal.number}
             </span>
-            <span className="text-3xl font-black text-white tracking-tight uppercase">
+            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
               {getDisplayTitleExternal()}
             </span>
           </div>
         </div>
       )}
 
-      {/* Dropdown - Tipo de Evento */}
-      <div className="w-full custom-dropdown relative z-20">
-        <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-2 pl-2">Tipo de Evento</label>
+      {/* Selector: Tipo de Evento */}
+      <div className="w-full relative z-20">
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2 px-1">
+          Tipo de Evento
+        </label>
         <div
-          className={`w-full bg-white font-bold text-gray-800 text-lg rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between cursor-pointer border transition-all ${isTipoOpen ? "border-emerald-500 ring-4 ring-emerald-50" : "border-gray-100"}`}
-          onClick={() => {
-            setIsTipoOpen(!isTipoOpen);
-            setIsLargoOpen(false);
-          }}
+          className={`w-full bg-white font-black text-neutral-800 text-base rounded-2xl px-5 py-3.5 shadow-2xs flex items-center justify-between cursor-pointer border transition-all ${
+            isTipoOpen 
+              ? "border-[#1B4820] ring-2 ring-[#1B4820]/15" 
+              : "border-neutral-200/80 hover:border-neutral-300"
+          }`}
+          onClick={() => setIsTipoOpen(!isTipoOpen)}
         >
           <span>{tipoEvento === 'Otro' && eventoPersonalizado ? eventoPersonalizado : tipoEvento}</span>
-          <ChevronDown className={`w-5 h-5 text-[#1A3621] transition-transform duration-300 ${isTipoOpen ? "rotate-180" : ""}`} />
+          <ChevronDown className={`w-4 h-4 text-[#1B4820] transition-transform duration-300 ${isTipoOpen ? "rotate-180" : ""}`} />
         </div>
 
         {isDuplicateBlocked && (
-          <div className="mt-2 flex items-center gap-2 px-3 py-2.5 bg-red-50 text-red-700 rounded-xl border border-red-100 animate-in fade-in slide-in-from-top-1">
+          <div className="mt-2 flex items-center gap-2 px-3.5 py-2.5 bg-red-50 text-red-700 rounded-xl border border-red-200/80 animate-in fade-in slide-in-from-top-1">
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <p className="text-[11px] font-bold leading-tight">Ya existe un registro de "Destete". No se puede repetir este evento único.</p>
+            <p className="text-xs font-bold leading-tight">Ya existe un registro de "{tipoEvento}". No se puede duplicar este evento único.</p>
           </div>
         )}
 
         {duplicateWarning && (
-          <div className="mt-2 flex items-center gap-2 px-3 py-2.5 bg-amber-50 text-amber-700 rounded-xl border border-amber-100 animate-in fade-in slide-in-from-top-1">
+          <div className="mt-2 flex items-center gap-2 px-3.5 py-2.5 bg-amber-50 text-amber-800 rounded-xl border border-amber-200/80 animate-in fade-in slide-in-from-top-1">
             <Info className="w-4 h-4 flex-shrink-0" />
-            <p className="text-[11px] font-bold leading-tight">Ya existe un registro de "{tipoEvento}". ¿Deseas registrar un nuevo pesaje?</p>
+            <p className="text-xs font-bold leading-tight">Ya existe un registro previo de "{tipoEvento}". Se añadirá un nuevo pesaje adicional.</p>
           </div>
         )}
 
         {isTipoOpen && (
-          <div className="absolute top-[90px] left-0 w-full bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-100 overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+          <div className="absolute top-[76px] left-0 w-full bg-white/98 backdrop-blur-md rounded-2xl shadow-xl border border-neutral-200/80 overflow-hidden py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
             {tipoOpciones.map((opcion) => (
               <div
                 key={opcion}
                 onClick={() => selectTipoEvento(opcion)}
-                className={`px-6 py-4 font-bold cursor-pointer hover:bg-emerald-50 transition-colors ${tipoEvento === opcion ? "text-emerald-700 bg-emerald-50/50" : "text-gray-700"}`}
+                className={`px-5 py-3 font-bold text-sm cursor-pointer hover:bg-emerald-50 transition-colors flex items-center justify-between ${
+                  tipoEvento === opcion ? "text-[#1B4820] bg-emerald-50/70 font-black" : "text-neutral-700"
+                }`}
               >
-                {opcion}
+                <span>{opcion}</span>
+                {tipoEvento === opcion && <div className="w-2 h-2 rounded-full bg-[#1B4820]" />}
               </div>
             ))}
           </div>
@@ -342,199 +351,238 @@ export default function EventForm({
       </div>
 
       {/* Datos Pesaje */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100/50 flex flex-col">
-          <div className="flex items-center gap-1.5 mb-2">
-            <div className="w-1 h-3 rounded-full bg-emerald-600" />
-            <label className="text-[9px] font-black uppercase tracking-wider text-gray-400">Peso Animal (KG)</label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-2xs border border-neutral-200/80 flex flex-col focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 bg-emerald-50 text-[#1B4820] rounded-lg">
+              <Scale className="w-4 h-4" />
+            </div>
+            <label className="text-[10px] font-black uppercase tracking-wider text-neutral-500">
+              Peso Animal (KG)
+            </label>
           </div>
           <input
             type="text"
             inputMode="decimal"
             placeholder="0.00"
             onKeyDown={preventInvalidNumberKeys}
-            className="text-2xl font-black text-[#1A3621] outline-none w-full bg-transparent placeholder-gray-200"
+            className="text-2xl font-black text-[#1B4820] outline-none w-full bg-transparent placeholder-neutral-200"
             {...register("pesoCria", { onChange: handleNumericInput })}
           />
         </div>
 
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100/50 flex flex-col opacity-80">
-          <div className="flex items-center gap-1.5 mb-2">
-            <div className="w-1 h-3 rounded-full bg-amber-600" />
-            <label className="text-[9px] font-black uppercase tracking-wider text-gray-400">Peso Madre (KG)</label>
+        <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-2xs border border-neutral-200/80 flex flex-col focus-within:border-amber-600 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 bg-amber-50 text-amber-800 rounded-lg">
+              <Scale className="w-4 h-4" />
+            </div>
+            <label className="text-[10px] font-black uppercase tracking-wider text-neutral-500">
+              Peso Madre (KG)
+            </label>
           </div>
           <input
             type="text"
             inputMode="decimal"
             placeholder="0.00"
             onKeyDown={preventInvalidNumberKeys}
-            className="text-2xl font-black text-amber-900/40 outline-none w-full bg-transparent placeholder-gray-200 focus:text-amber-900 focus:opacity-100 transition-all"
+            className="text-2xl font-black text-amber-900 outline-none w-full bg-transparent placeholder-neutral-200"
             {...register("pesoVaca", { onChange: handleNumericInput })}
           />
         </div>
       </div>
 
       {/* FECHA Y MEDIDAS */}
-      <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100/50 space-y-6">
+      <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-2xs border border-neutral-200/80 space-y-5">
+        {/* Fecha del Evento */}
         <div className="flex flex-col">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3 ml-1">Fecha del Evento</label>
-          <div className="flex items-center gap-4 bg-gray-50 rounded-2xl px-5 py-4 border border-gray-100">
-            <Calendar size={22} className="text-[#1A3621] opacity-70" />
-            <DateInput className="font-black text-gray-800 text-lg outline-none w-full bg-transparent" {...register("fechaEvento")} />
+          <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2 px-1">
+            Fecha del Evento
+          </label>
+          <div className="flex items-center gap-3 bg-neutral-50 hover:bg-neutral-100/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-600/30 focus-within:border-emerald-600 rounded-2xl px-4 py-3.5 border border-neutral-200/80 transition-all">
+            <Calendar className="w-5 h-5 text-[#1B4820]/70 flex-shrink-0" />
+            <DateInput className="font-bold text-neutral-900 text-base outline-none w-full bg-transparent" {...register("fechaEvento")} />
           </div>
         </div>
 
-        <div className="h-[1px] bg-gray-100 w-full" />
+        <div className="h-[1px] bg-neutral-100 w-full" />
 
-        <div className="grid grid-cols-1 gap-5">
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3 ml-1">Circ. Escrotal (CM)</label>
-            <div className="flex items-center gap-4 bg-gray-50 rounded-2xl px-5 py-4 border border-gray-100">
-              <Ruler size={22} className="text-[#1A3621] opacity-70" />
-              <input type="text" inputMode="decimal" placeholder="0.0" onKeyDown={preventInvalidNumberKeys} className="font-black text-gray-800 text-lg outline-none w-full bg-transparent" {...register("circunferencia", { onChange: handleNumericInput })} />
-            </div>
-          </div>
-
-          <div className="custom-dropdown relative flex flex-col">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3 ml-1">Largo Viril/Ombligo</label>
-            <div
-              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 flex items-center justify-between cursor-pointer"
-              onClick={() => {
-                setIsLargoOpen(!isLargoOpen);
-                setIsTipoOpen(false);
-              }}
-            >
-              <span className="font-black text-gray-800 text-base">{largoOpciones.find(o => o.value === selectedLargo)?.label || "No especificado"}</span>
-              <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isLargoOpen ? "rotate-180" : ""}`} />
-            </div>
-
-            {isLargoOpen && (
-              <div className="absolute top-[85px] left-0 w-full bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden py-2 z-40 animate-in fade-in zoom-in-95">
-                {largoOpciones.map((opcion) => (
-                  <div
-                    key={opcion.value}
-                    onClick={() => {
-                      setValue("largoViril", opcion.value);
-                      setIsLargoOpen(false);
-                    }}
-                    className={`px-6 py-4 font-bold text-base cursor-pointer hover:bg-gray-50 transition-colors ${selectedLargo === opcion.value ? "text-emerald-700 bg-emerald-50/50" : "text-gray-700"}`}
-                  >
-                    {opcion.label}
-                  </div>
-                ))}
+        {/* Medidas Biológicas: Circunferencia Escrotal y Longitud del Ombligo */}
+        <div className={`grid ${showScrotal ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-4`}>
+          {showScrotal && (
+            <div>
+              <div className="flex items-center justify-between mb-2 px-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                  Circ. Escrotal (CM)
+                </label>
+                <span className="text-[10px] text-neutral-400 font-medium">Opcional</span>
               </div>
-            )}
+              <div className="flex items-center gap-3 bg-neutral-50 hover:bg-neutral-100/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-600/30 focus-within:border-emerald-600 rounded-2xl px-4 py-3.5 border border-neutral-200/80 transition-all">
+                <Ruler className="w-5 h-5 text-[#1B4820]/70 flex-shrink-0" />
+                <input 
+                  type="text" 
+                  inputMode="decimal" 
+                  placeholder="0.0" 
+                  onKeyDown={preventInvalidNumberKeys} 
+                  className="font-black text-neutral-900 text-base outline-none w-full bg-transparent placeholder-neutral-300" 
+                  {...register("circunferencia", { onChange: handleNumericInput })} 
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <div className="flex items-center justify-between mb-2 px-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                Longitud del Ombligo (1 - 9)
+              </label>
+              <span className="text-[10px] text-neutral-400 font-medium">Escala 1 al 9</span>
+            </div>
+            <div className="flex items-center gap-3 bg-neutral-50 hover:bg-neutral-100/80 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-600/30 focus-within:border-emerald-600 rounded-2xl px-4 py-3.5 border border-neutral-200/80 transition-all">
+              <Ruler className="w-5 h-5 text-[#1B4820]/70 flex-shrink-0" />
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[1-9]"
+                maxLength={1}
+                placeholder="1 - 9"
+                onKeyDown={handleNavelKeyDown}
+                className="font-black text-neutral-900 text-base outline-none w-full bg-transparent placeholder-neutral-300"
+                {...register("largoViril", {
+                  onChange: (e) => {
+                    const clean = e.target.value.replace(/[^1-9]/g, '').slice(0, 1);
+                    setValue('largoViril', clean);
+                  }
+                })}
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Observaciones */}
-      <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100/50 flex flex-col">
-        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 ml-1 flex items-center gap-2">
-          <MessageSquare size={14} className="text-emerald-600" />
-          Notas del Ganadero
-        </label>
+      <div className="bg-white rounded-3xl p-5 shadow-2xs border border-neutral-200/80 space-y-2">
+        <div className="flex items-center gap-2 ml-1">
+          <MessageSquare className="w-4 h-4 text-[#1B4820]" />
+          <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+            Notas u Observaciones
+          </label>
+        </div>
         <textarea
-          placeholder="Añade detalles relevantes..."
+          placeholder="Añade detalles relevantes sobre este pesaje o evento..."
           rows={3}
-          className="font-bold text-gray-800 text-base outline-none w-full bg-transparent resize-none placeholder-gray-200 min-h-[100px]"
+          className="font-medium text-neutral-800 text-sm outline-none w-full bg-neutral-50 hover:bg-neutral-100/70 focus:bg-white focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600 rounded-2xl p-4 border border-neutral-200/80 transition-all resize-none placeholder-neutral-300 min-h-[90px]"
           {...register("observaciones")}
         />
       </div>
 
-      {/* Fotografía */}
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        className="relative h-48 border-4 border-dashed border-gray-200 rounded-[3rem] flex flex-col items-center justify-center bg-white cursor-pointer active:scale-95 transition-all hover:border-emerald-200 hover:bg-emerald-50/10 overflow-hidden"
-      >
-        {photoPreview ? (
-          <>
-            <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); removePhoto(); }}
-              className="absolute top-4 right-4 bg-red-500 text-white p-2.5 rounded-full shadow-lg hover:bg-red-600 active:scale-90 transition-all z-10 cursor-pointer"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </>
-        ) : (
-          <div className="flex flex-col items-center">
-            <div className="bg-emerald-50 rounded-full p-5 mb-4 group-hover:bg-emerald-100 transition-colors">
-              <Camera className="text-emerald-700 w-8 h-8" strokeWidth={1.5} />
+      {/* Fotografía del Evento */}
+      <div className="bg-white rounded-3xl p-5 shadow-2xs border border-neutral-200/80 space-y-3">
+        <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block ml-1">
+          Fotografía del Evento
+        </label>
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="relative h-44 border-2 border-dashed border-neutral-200 hover:border-emerald-600 rounded-2xl flex flex-col items-center justify-center bg-neutral-50/50 hover:bg-emerald-50/20 cursor-pointer active:scale-[0.99] transition-all overflow-hidden group"
+        >
+          {photoPreview ? (
+            <>
+              <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); removePhoto(); }}
+                className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full shadow-md active:scale-90 transition-all z-10 cursor-pointer"
+                title="Eliminar foto"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-center p-4">
+              <div className="bg-emerald-50 text-[#1B4820] p-3 rounded-2xl group-hover:bg-emerald-100 group-hover:scale-105 transition-all">
+                <Camera className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-xs font-black text-neutral-700 block">Tomar o subir foto</span>
+                <span className="text-[10px] text-neutral-400 font-medium">Opcional para documentar el evento</span>
+              </div>
             </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-900">Tomar Foto del Evento</span>
-            <span className="text-[9px] text-gray-400 mt-1 font-bold">Opcional para el registro</span>
-          </div>
-        )}
-        <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePhotoUpload} className="hidden" />
+          )}
+          <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePhotoUpload} className="hidden" />
+        </div>
       </div>
 
-      {/* Footer */}
-      <div className={`${isModal ? "" : "fixed bottom-0 left-0 w-full bg-gradient-to-t from-[#F8F9F5] via-[#F8F9F5] to-transparent pt-12 pb-8 px-5 z-40"}`}>
-        <div className={`max-w-md mx-auto grid grid-cols-2 gap-4 ${isModal ? "mt-4" : ""}`}>
+      {/* Footer Acciones */}
+      <div className={`${isModal ? "pt-2" : "fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-neutral-200/80 py-4 px-5 z-40"}`}>
+        <div className="max-w-md mx-auto grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSaving}
-            className="flex items-center justify-center gap-2 bg-[#D15E5A] hover:bg-[#B94545] text-white rounded-full py-4 transition-all active:scale-95 shadow-[0_4px_14px_rgba(209,94,90,0.3)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 active:scale-95 text-neutral-700 rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            <X size={20} strokeWidth={2.5} />
-            <span className="text-xs font-bold uppercase tracking-widest">Cancelar</span>
+            <X className="w-4 h-4" />
+            <span>Cancelar</span>
           </button>
 
           <button
             type="button"
             onClick={handleSubmit(onSubmit)}
             disabled={isSaving || isDuplicateBlocked}
-            className={`flex items-center justify-center gap-2 rounded-full py-4 transition-all active:scale-95 shadow-lg shadow-emerald-900/20 disabled:opacity-70 disabled:cursor-not-allowed ${isDuplicateBlocked ? "bg-gray-300 text-gray-500" : "bg-[#1A3621] hover:bg-[#0F2912] text-white cursor-pointer"}`}
+            className={`flex items-center justify-center gap-2 rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
+              isDuplicateBlocked 
+                ? "bg-neutral-300 text-neutral-500 cursor-not-allowed" 
+                : "bg-[#1B4820] hover:bg-[#123316] text-white cursor-pointer shadow-emerald-900/20"
+            }`}
           >
             {isSaving ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Guardando...</span>
+              </>
             ) : (
-              <Save size={20} strokeWidth={2.5} />
+              <>
+                <Save className="w-4 h-4" />
+                <span>{isEditing ? 'Guardar Cambios' : 'Registrar Evento'}</span>
+              </>
             )}
-            <span className="text-xs font-bold uppercase tracking-widest">
-              {isSaving ? 'Guardando...' : 'Guardar'}
-            </span>
           </button>
         </div>
       </div>
 
-      {/* MODAL: Nombre del Evento */}
+      {/* MODAL: Nombre del Evento Personalizado */}
       <BottomSheet
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          setTipoEvento(isEditing ? (["Destete", "Peso a los 12 meses", "Peso a los 18 meses"].includes(initialValues.event_type) ? initialValues.event_type : "Destete") : "Destete");
+          setTipoEvento(isEditing ? (knownTypes.includes(initialValues.event_type) ? initialValues.event_type : "Destete") : "Destete");
         }}
-        title="Tipo Personalizado"
-        description="Define el nombre de este pesaje o evento especial."
+        title="Tipo de Evento Personalizado"
+        description="Define el nombre para este pesaje o evento especial."
       >
-        <div className="flex flex-col pb-2">
+        <div className="flex flex-col pb-2 space-y-4">
           <input
             type="text"
             onChange={(e) => setTempNombreEvento(e.target.value)}
             value={tempNombreEvento}
             placeholder="Ej. Pesaje de Verano"
-            className="w-full bg-gray-50 border-2 border-gray-100 rounded-3xl px-7 py-5 text-2xl font-black text-[#1A3621] outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-inner mb-10"
+            className="w-full bg-neutral-50 border border-neutral-200 rounded-2xl px-5 py-4 text-lg font-black text-neutral-900 outline-none focus:border-emerald-600 focus:bg-white transition-all"
             autoFocus
           />
-          <div className="flex gap-4">
+          <div className="grid grid-cols-2 gap-3 pt-2">
             <button
               type="button"
               onClick={() => {
                 setIsModalOpen(false);
-                setTipoEvento(isEditing ? (["Destete", "Peso a los 12 meses", "Peso a los 18 meses"].includes(initialValues.event_type) ? initialValues.event_type : "Destete") : "Destete");
+                setTipoEvento(isEditing ? (knownTypes.includes(initialValues.event_type) ? initialValues.event_type : "Destete") : "Destete");
               }}
-              className="flex-1 py-5 font-black text-gray-500 bg-gray-100 rounded-full uppercase tracking-widest text-xs transition-all active:scale-95 cursor-pointer"
+              className="py-3.5 font-bold text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-full uppercase tracking-wider text-xs transition-all active:scale-95 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="button"
               onClick={handleModalConfirm}
-              className="flex-1 py-5 font-black text-white bg-emerald-700 rounded-full shadow-lg shadow-emerald-900/20 uppercase tracking-widest text-xs transition-all active:scale-95 cursor-pointer"
+              className="py-3.5 font-bold text-white bg-[#1B4820] hover:bg-[#123316] rounded-full shadow-md uppercase tracking-wider text-xs transition-all active:scale-95 cursor-pointer"
             >
               Confirmar
             </button>

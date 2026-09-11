@@ -1,25 +1,63 @@
 import React, { useState } from 'react';
 import { 
   TrendingUp, 
+  TrendingDown,
   Plus, 
   Scale, 
   Ruler, 
-  Info,
-  History
+  History,
+  Calendar,
+  Sparkles,
+  MessageSquare,
+  Pencil
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { motion } from 'framer-motion';
 import { db } from '@/lib/db';
 import { formatWeight, formatDateLocal } from '@/lib/dateUtils';
 import AnimalImage from '@/components/inventario/AnimalImage';
 import BottomSheet from '@/components/ui/BottomSheet';
 import EventForm from '@/components/inventario/EventForm';
 
+/**
+ * Retorna la configuración estética del badge según el tipo de evento
+ */
+function getEventTypeBadge(type) {
+  const t = (type || '').toLowerCase();
+  if (t.includes('nacimiento')) {
+    return {
+      bg: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+      icon: Sparkles,
+      dot: 'bg-emerald-500'
+    };
+  }
+  if (t.includes('destete')) {
+    return {
+      bg: 'bg-amber-50 text-amber-800 border-amber-200/80',
+      icon: TrendingUp,
+      dot: 'bg-amber-500'
+    };
+  }
+  if (t.includes('meses') || t.includes('peso')) {
+    return {
+      bg: 'bg-sky-50 text-sky-800 border-sky-200/80',
+      icon: Scale,
+      dot: 'bg-sky-500'
+    };
+  }
+  return {
+    bg: 'bg-stone-100 text-stone-800 border-stone-200/80',
+    icon: Calendar,
+    dot: 'bg-stone-500'
+  };
+}
+
 export default function EvolutionTab({ animal }) {
   const animalId = animal?.id;
   const [editingEvent, setEditingEvent] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   
-  // Consulta reactiva a los eventos de crecimiento
+  // Consulta reactiva a los eventos de crecimiento (orden descendente por fecha)
   const events = useLiveQuery(
     () => db.growth_events
       .where('animal_id').equals(animalId)
@@ -32,102 +70,193 @@ export default function EvolutionTab({ animal }) {
   if (!animal) return null;
 
   return (
-    <div className="max-w-2xl mx-auto py-2 pb-24 relative">
+    <div className="max-w-3xl mx-auto py-2 pb-24 relative">
       
-      {/* TÍTULO DE SECCIÓN COMPACTO */}
-      <div className="mb-6 px-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-black text-[#1B4820] leading-tight">Evolución</h2>
-          <div className="bg-[#EEF7EE] px-3 py-1.5 rounded-xl text-[#1B4820] font-black text-lg border border-[#1B4820]/10">
+      {/* TÍTULO DE SECCIÓN Y ACCIONES */}
+      <div className="mb-6 px-1 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-[#EEF7EE] text-[#1B4820] rounded-2xl border border-[#1B4820]/10">
+            <TrendingUp className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1B4820] leading-tight">Evolución</h2>
+            <p className="text-xs text-neutral-400 font-medium">Historial cronológico de pesajes y desarrollo</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsCreateOpen(true)}
+            className="hidden md:flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-4 py-2.5 rounded-2xl shadow-xs text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Registrar Evento</span>
+          </button>
+          <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10">
             #{animal.number}
           </div>
         </div>
       </div>
 
-      <div className="relative pl-6 border-l-2 border-neutral-200 space-y-6 ml-4">
+      {/* LÍNEA DE TIEMPO DE EVENTOS */}
+      <div className="relative pl-6 sm:pl-8 border-l-2 border-emerald-600/20 space-y-6 ml-3 sm:ml-4">
         {events && events.length > 0 ? (
-          events.map((event, i) => (
-            <div key={event.id} className="relative">
-              <div className={`absolute -left-[33px] top-0 w-4 h-4 rounded-full border-[3px] border-[#F7F7F2] shadow-sm z-10 ${
-                i === 0 ? 'bg-[#1B4820]' : 'bg-neutral-300'
-              }`} />
+          events.map((event, i) => {
+            const badge = getEventTypeBadge(event.event_type);
+            // Calcular delta de peso respecto al evento cronológicamente anterior (events[i + 1])
+            const prevEvent = events[i + 1];
+            const weightDiff = (event.weight_kg !== null && event.weight_kg !== undefined && prevEvent?.weight_kg !== null && prevEvent?.weight_kg !== undefined)
+              ? (Number(event.weight_kg) - Number(prevEvent.weight_kg)).toFixed(1)
+              : null;
 
-              <article 
-                className="flex flex-col bg-white rounded-[2rem] overflow-hidden shadow-sm border border-neutral-100 group cursor-pointer active:scale-[0.98] transition-all"
-                onClick={() => setEditingEvent(event)}
-              >
-                
-                {/* IMAGEN DEL EVENTO */}
-                <div className="relative h-48 md:h-80 w-full overflow-hidden bg-neutral-100">
-                  <AnimalImage 
-                    photoPath={event.photo_path}
-                    photoBlob={event.photo_blob}
-                    alt={event.event_type}
-                    className="w-full h-full transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[9px] font-bold uppercase">
-                    {formatDateLocal(event.event_date)}
-                  </div>
-                </div>
+            return (
+              <div key={event.id} className="relative">
+                {/* Nodo en la línea de tiempo */}
+                <div className={`absolute -left-[31px] sm:-left-[39px] top-4 w-4 h-4 rounded-full border-[3px] border-[#F7F7F2] shadow-sm z-10 transition-colors ${
+                  i === 0 ? 'bg-[#1B4820] ring-4 ring-emerald-100 animate-pulse' : 'bg-neutral-300'
+                }`} />
 
-                <div className="p-5 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-xl font-black text-neutral-900">{event.event_type}</h4>
-                      
-                      {/* DATOS SECUNDARIOS */}
-                      {(event.scrotal_circumference_cm || event.navel_length) && (
-                        <div className="flex gap-3 mt-1">
-                          {event.scrotal_circumference_cm && (
-                            <div className="flex items-center gap-1 text-neutral-500">
-                              <Ruler className="w-3 h-3" />
-                              <span className="text-[10px] font-bold">C.E: {event.scrotal_circumference_cm}cm</span>
-                            </div>
-                          )}
-                          {event.navel_length && (
-                            <div className="flex items-center gap-1 text-neutral-500">
-                              <Info className="w-3 h-3" />
-                              <span className="text-[10px] font-bold">Ombligo: {event.navel_length}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* GRID DE PESOS */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <DataBox icon={Scale} label="Peso Cría" value={formatWeight(event.weight_kg)} />
-                    <DataBox icon={Scale} label="Peso Madre" value={formatWeight(event.mother_weight_kg)} />
-                  </div>
-
-                  {/* OBSERVACIONES */}
-                  {event.observations && (
-                    <div className="bg-[#F8F9F5] p-3 rounded-xl">
-                      <p className="text-[11px] text-neutral-600 font-medium leading-snug">
-                        <span className="text-[8px] font-black text-neutral-400 uppercase mr-1">Nota:</span>
-                        {event.observations}
-                      </p>
+                {/* Tarjeta de Evento */}
+                <article 
+                  className="flex flex-col bg-white rounded-3xl overflow-hidden shadow-xs hover:shadow-md border border-neutral-100 hover:border-emerald-200/80 transition-all duration-300 group cursor-pointer active:scale-[0.99]"
+                  onClick={() => setEditingEvent(event)}
+                >
+                  {/* Imagen del Evento (solo si existe) */}
+                  {(event.photo_blob || event.photo_path) && (
+                    <div className="relative h-48 sm:h-64 w-full overflow-hidden bg-neutral-100">
+                      <AnimalImage 
+                        photoPath={event.photo_path}
+                        photoBlob={event.photo_blob}
+                        alt={event.event_type}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white border border-white/20 px-3 py-1 rounded-full text-[10px] font-bold">
+                        {formatDateLocal(event.event_date)}
+                      </div>
                     </div>
                   )}
-                </div>
-              </article>
-            </div>
-          ))
+
+                  <div className="p-5 sm:p-6 space-y-4">
+                    {/* Cabecera del Evento */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${badge.bg}`}>
+                          <badge.icon className="w-3.5 h-3.5" />
+                          <span>{event.event_type}</span>
+                        </span>
+                        {!(event.photo_blob || event.photo_path) && (
+                          <span className="text-xs font-bold text-neutral-400 flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5 text-neutral-400" />
+                            {formatDateLocal(event.event_date)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="hidden group-hover:inline text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
+                          Editar
+                        </span>
+                        <div className="text-neutral-400 group-hover:text-[#1B4820] group-hover:bg-emerald-50 p-2 rounded-xl transition-all">
+                          <Pencil className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Métricas Principales */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {event.weight_kg !== null && event.weight_kg !== undefined && (
+                        <DataBox 
+                          icon={Scale} 
+                          label="Peso Animal" 
+                          value={formatWeight(event.weight_kg)}
+                          delta={weightDiff !== null && (
+                            <span className={`inline-flex items-center gap-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                              Number(weightDiff) >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                            }`}>
+                              {Number(weightDiff) >= 0 ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                              <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
+                            </span>
+                          )}
+                        />
+                      )}
+                      {event.mother_weight_kg && (
+                        <DataBox icon={Scale} label="Peso Madre" value={formatWeight(event.mother_weight_kg)} />
+                      )}
+                      {event.scrotal_circumference_cm && (
+                        <DataBox icon={Ruler} label="Circ. Escrotal" value={`${event.scrotal_circumference_cm} cm`} />
+                      )}
+                      {event.navel_length && (
+                        <DataBox icon={Ruler} label="Largo Ombligo" value={`Escala ${event.navel_length}`} />
+                      )}
+                    </div>
+
+                    {/* Observaciones */}
+                    {event.observations && (
+                      <div className="bg-[#F8F9F5] p-3.5 rounded-2xl border border-neutral-100/80 flex items-start gap-2.5">
+                        <MessageSquare className="w-4 h-4 text-[#1B4820] flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-neutral-700 font-medium leading-relaxed">
+                          {event.observations}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              </div>
+            );
+          })
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-neutral-400">
-            <History className="w-12 h-12 mb-3 opacity-20" />
-            <p className="text-sm font-bold uppercase tracking-widest text-center">Sin eventos registrados</p>
+          <div className="flex flex-col items-center justify-center py-16 px-4 bg-white rounded-3xl border border-neutral-100 shadow-2xs text-center space-y-4">
+            <div className="p-4 bg-emerald-50 text-[#1B4820] rounded-3xl">
+              <History className="w-10 h-10 opacity-70" />
+            </div>
+            <div className="max-w-xs">
+              <h3 className="text-base font-black text-neutral-800">Sin eventos de evolución</h3>
+              <p className="text-xs text-neutral-400 font-medium mt-1">
+                Registra el nacimiento, destete o pesajes para monitorear el desarrollo de #{animal.number}.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className="flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-5 py-3 rounded-full text-xs uppercase tracking-wider shadow-sm transition-all active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Registrar Primer Evento</span>
+            </button>
           </div>
         )}
       </div>
 
-      {/* --- ENLACE ACTUALIZADO HACIA EVENTO --- */}
-      <Link to={`/inventario/perfil/evento?id=${animalId}`} className="fixed bottom-28 md:bottom-10 right-6 md:right-10 bg-[#1B4820] text-white p-4 rounded-full shadow-2xl z-50 transition-all active:scale-95 cursor-pointer">
-        <Plus className="w-7 h-7" strokeWidth={3} />
-      </Link>
+      {/* Botón Flotante para MÓVIL (FAB) */}
+      <motion.button 
+        initial={{ opacity: 0, scale: 0.85, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        whileTap={{ scale: 0.93 }}
+        transition={{ duration: 0.2 }}
+        onClick={() => setIsCreateOpen(true)}
+        className="fixed bottom-20 right-4 z-30 md:hidden flex items-center gap-2 bg-[#1B4820] hover:bg-[#123316] text-white font-bold px-4 py-3 rounded-full shadow-[0_8px_25px_rgba(27,72,32,0.4)] border border-emerald-600/30 cursor-pointer text-xs uppercase tracking-wider backdrop-blur-xs"
+        title="Registrar Evento"
+      >
+        <Plus className="w-4 h-4" />
+        <span>Evento</span>
+      </motion.button>
 
-      {/* MODAL DE EDICIÓN */}
+      {/* MODAL DE CREACIÓN DE EVENTO */}
+      <BottomSheet
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        title="Registrar Evento de Evolución"
+        description={`Añade un pesaje o evento de desarrollo para #${animal.number}`}
+      >
+        <EventForm 
+          animal={animal}
+          existingEvents={events || []}
+          onSubmitSuccess={() => setIsCreateOpen(false)}
+          onCancel={() => setIsCreateOpen(false)}
+          isModal
+        />
+      </BottomSheet>
+
+      {/* MODAL DE EDICIÓN DE EVENTO */}
       <BottomSheet
         isOpen={!!editingEvent}
         onClose={() => setEditingEvent(null)}
@@ -148,16 +277,17 @@ export default function EvolutionTab({ animal }) {
   );
 }
 
-function DataBox({ icon: Icon, label, value }) {
+function DataBox({ icon: Icon, label, value, delta }) {
   return (
-    <div className="bg-neutral-50 p-2.5 rounded-xl border border-neutral-100 flex items-center gap-2">
-      <div className="bg-white p-1.5 rounded-lg shadow-sm">
-        <Icon className="w-3.5 h-3.5 text-[#8C6746]" />
+    <div className="bg-neutral-50 p-3 rounded-2xl border border-neutral-100 flex flex-col justify-between">
+      <div className="flex items-center justify-between gap-1 mb-1">
+        <div className="flex items-center gap-1.5 text-neutral-400">
+          <Icon className="w-3.5 h-3.5 text-[#1B4820]/70" />
+          <p className="text-[9px] font-black uppercase tracking-wider truncate">{label}</p>
+        </div>
+        {delta}
       </div>
-      <div>
-        <p className="text-[8px] font-black text-neutral-400 uppercase leading-none mb-0.5">{label}</p>
-        <p className="text-sm font-black text-neutral-800 leading-none">{value}</p>
-      </div>
+      <p className="text-sm font-black text-neutral-800 leading-none">{value}</p>
     </div>
   );
 }

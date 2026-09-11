@@ -4,6 +4,28 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.1-ui-evolution-tab-modernization] - 2026-09-11
+
+### Agregado y Modificado
+- **Modernización y Rediseño de la Vista de Evolución ([`EvolutionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/EvolutionTab.jsx))**:
+  - **Línea de Tiempo Interactiva y Moderna**:
+    - Nodos estilizados con pulso esmeralda en el evento más reciente (`animate-pulse`) y conector vertical pulido.
+    - Badges temáticos para tipos de eventos con iconografía vectorial (Nacimiento, Destete, Pesajes, Otros).
+    - Tarjetas interactivas con elevación al hover, borde reactivo y botón de acción de edición directo.
+    - Soporte inteligente de fotografías: Se exhibe un marco panorámico si hay foto cargada, o una tarjeta compacta y limpia si no la hay, optimizando el espacio vertical.
+    - **Cálculo Automático de Ganancia de Peso ($\Delta$)**: Al comparar cada pesaje con el evento anterior en la cronología, se muestra la ganancia (ej. `+14.5 kg` con icono `TrendingUp`) o pérdida de peso en tiempo real.
+    - **Acción Rápida Flotante (FAB)**: Botón flotante `motion.button` en móvil (`bottom-20 right-4 z-30`) y botón integrado en la cabecera en escritorio para registrar eventos instantáneamente mediante modal sin abandonar la ficha.
+    - Estado vacío (*Empty State*) moderno y elegante con botón de acción directa.
+- **Formulario y Modal de Evento de Vida ([`EventForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/EventForm.jsx))**:
+  - **Longitud del Ombligo como Campo de Texto 1-9**:
+    - Reemplazado el antiguo selector desplegable por un campo de texto numérico restringido estrictamente a los dígitos del 1 al 9 (`onKeyDown`, `inputMode="numeric"`, `maxLength={1}` y sanitización en tiempo real).
+  - **Ocultamiento Condicional de Circunferencia Escrotal**:
+    - El campo de *Circ. Escrotal* se oculta de forma automática si el evento seleccionado es **Nacimiento** o si el animal es de sexo **Hembra**, adaptando la cuadrícula a una sola columna limpia sin huecos vacíos.
+  - **Estilizado Moderno sin Emojis**:
+    - Todos los controles adaptados a la paleta institucional (`#1B4820`), bordes pulidos `rounded-3xl`, feedback háptico y tipografía estructurada con iconografía Lucide exclusivamente.
+
+---
+
 ## [1.3.0-ui-fluid-animal-tabs] - 2026-09-11
 
 ### Agregado y Modificado
