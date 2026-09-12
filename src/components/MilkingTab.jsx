@@ -197,7 +197,7 @@ export default function MilkingTab({ animal }) {
                         e.stopPropagation();
                         handleOpenEdit(r);
                       }}
-                      className="p-2 text-neutral-400 hover:text-[#1B4820] hover:bg-[#EEF7EE] rounded-xl transition-colors cursor-pointer"
+                      className="p-2 text-[#1B4820] bg-[#EEF7EE] md:text-neutral-400 md:bg-transparent md:hover:text-[#1B4820] md:hover:bg-[#EEF7EE] rounded-xl transition-colors cursor-pointer"
                       title="Editar registro"
                       aria-label="Editar registro"
                     >
@@ -209,7 +209,7 @@ export default function MilkingTab({ animal }) {
                         e.stopPropagation();
                         setRecordToDelete(r);
                       }}
-                      className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                      className="p-2 text-red-600 bg-red-50 md:text-neutral-400 md:bg-transparent md:hover:text-red-600 md:hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
                       title="Eliminar registro"
                       aria-label="Eliminar registro"
                     >

@@ -284,7 +284,7 @@ export default function DetailsTab({ animal, onEdit }) {
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500">Padre (Toro)</span>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-[#1B4820] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <ArrowUpRight className="w-4 h-4 text-[#1B4820] md:text-neutral-400 md:group-hover:text-[#1B4820] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </div>
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-lg font-black text-neutral-900 group-hover:text-[#1B4820] transition-colors">
@@ -322,7 +322,7 @@ export default function DetailsTab({ animal, onEdit }) {
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500">Madre (Vaca)</span>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-[#1B4820] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <ArrowUpRight className="w-4 h-4 text-[#1B4820] md:text-neutral-400 md:group-hover:text-[#1B4820] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </div>
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-lg font-black text-neutral-900 group-hover:text-[#1B4820] transition-colors">

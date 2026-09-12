@@ -232,7 +232,7 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdate
                           <button
                             type="button"
                             onClick={() => handleStartEdit(f)}
-                            className="p-2 rounded-xl bg-white hover:bg-[#1B4820] text-neutral-600 hover:text-white border border-neutral-200/80 transition-all shadow-2xs cursor-pointer"
+                            className="p-2 rounded-xl text-[#1B4820] bg-emerald-50 border border-emerald-200/80 md:bg-white md:text-neutral-600 md:border-neutral-200/80 md:hover:bg-[#1B4820] md:hover:text-white transition-all shadow-2xs cursor-pointer"
                             title={`Editar ${f.name}`}
                           >
                             <Pencil className="w-3.5 h-3.5" />

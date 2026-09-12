@@ -126,7 +126,7 @@ export default function EvolutionTab({ animal }) {
                     </div>
                   )}
 
-                  <div className="p-5 sm:p-6 space-y-4">
+                  <div className="p-4 sm:p-6 space-y-4">
                     {/* Cabecera del Evento */}
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -134,6 +134,16 @@ export default function EvolutionTab({ animal }) {
                           <badge.icon className="w-3.5 h-3.5" />
                           <span>{event.event_type}</span>
                         </span>
+                        {weightDiff !== null && (
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black border ${
+                            Number(weightDiff) >= 0 
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' 
+                              : 'bg-rose-50 text-rose-800 border-rose-200/80'
+                          }`}>
+                            {Number(weightDiff) >= 0 ? <TrendingUp className="w-3 h-3 text-emerald-600" /> : <TrendingDown className="w-3 h-3 text-rose-600" />}
+                            <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
+                          </span>
+                        )}
                         {!(event.photo_blob || event.photo_path) && (
                           <span className="text-xs font-bold text-neutral-400 flex items-center gap-1">
                             <Calendar className="w-3.5 h-3.5 text-neutral-400" />
@@ -141,11 +151,11 @@ export default function EvolutionTab({ animal }) {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span className="hidden group-hover:inline text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="inline md:hidden md:group-hover:inline text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
                           Editar
                         </span>
-                        <div className="text-neutral-400 group-hover:text-[#1B4820] group-hover:bg-emerald-50 p-2 rounded-xl transition-all">
+                        <div className="text-[#1B4820] bg-emerald-50 md:text-neutral-400 md:bg-transparent md:group-hover:text-[#1B4820] md:group-hover:bg-emerald-50 p-2 rounded-xl transition-all">
                           <Pencil className="w-4 h-4" />
                         </div>
                       </div>
@@ -159,10 +169,10 @@ export default function EvolutionTab({ animal }) {
                           label="Peso" 
                           value={formatWeight(event.weight_kg)}
                           delta={weightDiff !== null && (
-                            <span className={`inline-flex items-center gap-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                            <span className={`inline-flex items-center gap-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
                               Number(weightDiff) >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                             }`}>
-                              {Number(weightDiff) >= 0 ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                              {Number(weightDiff) >= 0 ? <TrendingUp className="w-2.5 h-2.5 shrink-0" /> : <TrendingDown className="w-2.5 h-2.5 shrink-0" />}
                               <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
                             </span>
                           )}
@@ -297,15 +307,15 @@ export default function EvolutionTab({ animal }) {
 
 function DataBox({ icon: Icon, label, value, delta }) {
   return (
-    <div className="bg-neutral-50 p-3 rounded-2xl border border-neutral-100 flex flex-col justify-between">
-      <div className="flex items-center justify-between gap-1 mb-1">
-        <div className="flex items-center gap-1.5 text-neutral-400">
-          <Icon className="w-3.5 h-3.5 text-[#1B4820]/70" />
-          <p className="text-[9px] font-black uppercase tracking-wider truncate">{label}</p>
-        </div>
+    <div className="bg-neutral-50 p-2.5 sm:p-3 rounded-2xl border border-neutral-100/90 flex flex-col justify-between min-w-0">
+      <div className="flex items-center gap-1.5 text-neutral-400 mb-1.5">
+        <Icon className="w-3.5 h-3.5 text-[#1B4820]/70 shrink-0" />
+        <p className="text-[10px] font-black uppercase tracking-wider truncate">{label}</p>
+      </div>
+      <div className="flex items-baseline gap-1.5 flex-wrap">
+        <span className="text-sm sm:text-base font-black text-neutral-800 leading-none">{value}</span>
         {delta}
       </div>
-      <p className="text-sm font-black text-neutral-800 leading-none">{value}</p>
     </div>
   );
 }

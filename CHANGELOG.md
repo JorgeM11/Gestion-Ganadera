@@ -4,6 +4,22 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.14-mobile-action-colors-and-fab-overlay] - 2026-09-12
+
+### Corregido y Modificado
+- **Superposición del Difuminado/Overlay en Botón Flotante ([`Inventario.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Inventario.jsx))**:
+  - Resuelto el problema donde el overlay oscuro se posicionaba por encima del botón flotante (FAB) al desplegar las opciones rápidas.
+  - Se configuró el overlay de fondo en `z-40` cuando el FAB está abierto y `z-[55]` cuando se abre el panel de filtros. El contenedor del botón flotante se fijó en `z-50`, asegurando que el botón permanezca por encima de su propio difuminado pero por debajo de la barra lateral desplegable (`z-[70]`).
+- **Color Permanente en Botones de Acción para Dispositivos Móviles ([`MilkingTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/MilkingTab.jsx), [`HealthTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/HealthTab.jsx), [`ServiciosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/ServiciosTab.jsx), [`TactosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/TactosTab.jsx), [`PartosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/PartosTab.jsx), [`EvolutionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/EvolutionTab.jsx), [`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx), [`DetailsTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/DetailsTab.jsx))**:
+  - En móviles (donde no existe la interacción por `hover`), los botones de acción como **Editar**, **Eliminar**, **Ver Ficha** y accesos directos ahora muestran su color y fondo distintivo de forma fija (`text-[#1B4820] bg-[#EEF7EE]` para edición y navegación, `text-red-600 bg-red-50` para eliminación).
+  - En pantallas de escritorio (`md:`), se preserva el comportamiento interactivo original con tonos neutros en reposo y resaltado dinámico al pasar el cursor por encima (`md:text-neutral-400 md:bg-transparent md:hover:...`).
+- **Optimización Responsiva de Diferencia de Peso en Tarjetas de Eventos ([`EvolutionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/EvolutionTab.jsx))**:
+  - Se rediseñó la visualización del diferencial de peso (`weightDiff`) para prevenir roturas de maquetación en pantallas estrechas.
+  - La insignia de variación de peso (`+X.X kg` / `-X.X kg`) ahora se destaca en la cabecera de la tarjeta junto a la etiqueta del tipo de evento.
+  - En el componente `DataBox`, se desacopló el diferencial de la línea de encabezado, ubicándolo junto al valor numérico del peso con ajuste flexible de línea (`flex items-baseline gap-1.5 flex-wrap`), evitando truncamiento del título y desbordamientos horizontales.
+
+---
+
 ## [1.3.13-visual-and-drawer-refinements] - 2026-09-12
 
 ### Corregido y Modificado

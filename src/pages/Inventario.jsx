@@ -347,7 +347,7 @@ export default function InventarioPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-[35] cursor-pointer"
+            className={`fixed inset-0 bg-black/60 cursor-pointer ${isFilterOpen ? 'z-[55]' : 'z-40'}`}
             onClick={() => { setIsFabOpen(false); setIsFilterOpen(false); }}
           />
         )}
@@ -855,7 +855,7 @@ export default function InventarioPage() {
 
       {/* BOTÓN FLOTANTE (FAB) STREAMLINED (NUEVO REGISTRO Y MODO BATCH) */}
       {!isBatchMode && (
-        <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-30 flex flex-col items-end gap-3">
+        <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 flex flex-col items-end gap-3">
           <AnimatePresence>
             {isFabOpen && (
               <motion.div

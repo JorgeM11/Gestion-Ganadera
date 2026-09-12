@@ -83,10 +83,10 @@ export default function PartosTab({ animalId, animal }) {
                 <div className="flex items-center justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
                   <Link
                     to={`/inventario/perfil?id=${calf.id}&tab=details`}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-neutral-600 group-hover:text-[#1B4820] bg-neutral-50 group-hover:bg-[#EEF7EE] rounded-xl transition-colors cursor-pointer border border-neutral-200/60 group-hover:border-[#1B4820]/20"
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#1B4820] bg-[#EEF7EE] border-[#1B4820]/20 md:text-neutral-600 md:bg-neutral-50 md:border-neutral-200/60 md:group-hover:text-[#1B4820] md:group-hover:bg-[#EEF7EE] md:group-hover:border-[#1B4820]/20 rounded-xl transition-colors cursor-pointer border"
                   >
                     <span>Ver Ficha</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-[#1B4820] md:text-neutral-400 md:group-hover:text-[#1B4820] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                   </Link>
                 </div>
               </article>

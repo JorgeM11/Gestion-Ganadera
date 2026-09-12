@@ -290,7 +290,7 @@ export default function HealthTab({ animal }) {
                       e.stopPropagation();
                       setRecordToDelete(item);
                     }}
-                    className="p-2.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                    className="p-2.5 text-red-600 bg-red-50 md:text-neutral-400 md:bg-transparent md:hover:text-red-600 md:hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
                     title="Eliminar tratamiento"
                     aria-label="Eliminar tratamiento"
                   >
@@ -303,7 +303,7 @@ export default function HealthTab({ animal }) {
                       e.stopPropagation();
                       setEditingRecord(item);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-neutral-600 group-hover:text-[#1B4820] bg-neutral-50 group-hover:bg-[#EEF7EE] rounded-xl transition-colors cursor-pointer border border-neutral-200/60 group-hover:border-[#1B4820]/20"
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-[#1B4820] bg-[#EEF7EE] border-[#1B4820]/20 md:text-neutral-600 md:bg-neutral-50 md:border-neutral-200/60 md:group-hover:text-[#1B4820] md:group-hover:bg-[#EEF7EE] md:group-hover:border-[#1B4820]/20 rounded-xl transition-colors cursor-pointer border"
                     title="Editar registro"
                   >
                     <Pencil className="w-3.5 h-3.5" />
