@@ -18,7 +18,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
   - **Feedback y Alertas de Error Animadas**: La alerta de error de credenciales ahora cuenta con animación elástica de altura (`AnimatePresence` + `MotionDiv`), icono vectorial `AlertCircle` y paleta carmesí clara.
   - **Botón de Acción Principal Modernizado ([`PrimaryButton.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/PrimaryButton.jsx))**:
     - Esquinas ergonómicas `rounded-2xl`, relieve esmeralda, micro-interacción en hover con desplazamiento de flecha (`group-hover:translate-x-1`) e indicador spinner SVG estilizado durante la carga.
-  - **Pie Institucional de Seguridad**: Reaseguro visual de cifrado y sincronización local/nube junto con indicador de versión `v2.0 PWA`.
+  - **Créditos y Logo de Desarrollador en Sidebar y Login ([`NavigationDrawer.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/NavigationDrawer.jsx), [`Login.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Login.jsx))**:
+    - Se integró el bloque de firma *"Diseñado y desarrollado por NetGen"* con el logo oficial (`/image.png`) y enlace a su sitio web tanto en el footer de inicio de sesión como en la barra lateral desplegable debajo del indicador `PWA Offline-First v2.0`.
   - **100% Fidelidad Funcional**: Mantenida intacta la lógica de autenticación con `authService`, auto-redirección de sesión activa, validación con esquema Zod y compatibilidad offline.
 
 ---

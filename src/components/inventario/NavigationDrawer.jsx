@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+const MotionDiv = motion.div;
 import { 
   X, 
   Layers, 
@@ -34,8 +36,8 @@ export default function NavigationDrawer({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Fondo oscuro con desenfoque */}
-          <motion.div
+          {/* Overlay oscuro de fondo */}
+          <MotionDiv
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -45,7 +47,7 @@ export default function NavigationDrawer({
           />
 
           {/* Panel Lateral Drawer */}
-          <motion.div
+          <MotionDiv
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
@@ -182,12 +184,28 @@ export default function NavigationDrawer({
                 <span>Cerrar Sesión</span>
               </button>
 
-              <div className="px-4 text-[10px] text-neutral-400 font-semibold flex items-center justify-between">
-                <span>PWA Offline-First</span>
-                <span>v2.0</span>
+             
+
+              <div className="pt-2.5 border-t border-neutral-200/60 px-2 text-center text-[10.5px] text-neutral-500 font-medium flex items-center justify-center gap-1.5 flex-wrap">
+                <span>Diseñado y desarrollado por</span>
+                <a
+                  href="https://netgenteam.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-bold text-neutral-700 hover:text-[#1B4820] cursor-pointer transition-colors group"
+                >
+                  <img
+                    src="/image.png"
+                    alt="NetGen Logo"
+                    width={18}
+                    height={18}
+                    className="w-4 h-4 rounded-md object-contain shadow-2xs transition-transform group-hover:scale-105"
+                  />
+                  <span>NetGen</span>
+                </a>
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
         </div>
       )}
     </AnimatePresence>
