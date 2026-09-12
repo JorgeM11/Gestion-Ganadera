@@ -152,9 +152,7 @@ export default function EvolutionTab({ animal }) {
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        <span className="inline md:hidden md:group-hover:inline text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
-                          Editar
-                        </span>
+                        
                         <div className="text-[#1B4820] bg-emerald-50 md:text-neutral-400 md:bg-transparent md:group-hover:text-[#1B4820] md:group-hover:bg-emerald-50 p-2 rounded-xl transition-all">
                           <Pencil className="w-4 h-4" />
                         </div>
@@ -168,14 +166,7 @@ export default function EvolutionTab({ animal }) {
                           icon={Scale} 
                           label="Peso" 
                           value={formatWeight(event.weight_kg)}
-                          delta={weightDiff !== null && (
-                            <span className={`inline-flex items-center gap-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
-                              Number(weightDiff) >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                            }`}>
-                              {Number(weightDiff) >= 0 ? <TrendingUp className="w-2.5 h-2.5 shrink-0" /> : <TrendingDown className="w-2.5 h-2.5 shrink-0" />}
-                              <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
-                            </span>
-                          )}
+                          
                         />
                       )}
                       {event.mother_weight_kg && (
