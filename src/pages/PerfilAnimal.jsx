@@ -65,11 +65,15 @@ function ProfileContent() {
     return null;
   }, [animalId]);
 
-  // Sincronizar el tab si cambia en la URL
+  // Sincronizar el tab si cambia en la URL o si el animal cambia y la pestaña no aplica a su sexo
   useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab) setActiveTab(tab);
-  }, [searchParams]);
+    const tab = searchParams.get("tab") || 'details';
+    if (animal && animal.sex !== 'Hembra' && (tab === 'reproduction' || tab === 'milking')) {
+      setActiveTab('details');
+    } else {
+      setActiveTab(tab);
+    }
+  }, [searchParams, animal]);
 
   // Mientras carga el animal inicial o si no hay ID en la URL
   if (animal === undefined || !animalId) {

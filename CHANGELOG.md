@@ -4,6 +4,17 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.15-bull-redirection-to-details-tab] - 2026-09-12
+
+### Corregido y Modificado
+- **Redirección al Perfil de Detalles del Toro desde Servicios ([`ServiciosTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/reproduction/ServiciosTab.jsx), [`PerfilAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/PerfilAnimal.jsx), [`DetailsTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/DetailsTab.jsx))**:
+  - Resuelto el bug donde al hacer clic en el enlace del toro asignado a un servicio (`Padre / Pajuela`), la aplicación no cambiaba a la pestaña de detalles del animal y mantenía el estado `tab=reproduction` de la vaca madre, provocando una pantalla vacía o errónea debido a que los machos no poseen pestaña reproductiva.
+  - Se actualizó el enlace del toro en `ServiciosTab.jsx` para dirigir explícitamente a `/inventario/perfil?id=${service.father_id}&tab=details` y se aseguró la compatibilidad interactiva incluso si el número del toro aún no ha resuelto del mapa local.
+  - En `PerfilAnimal.jsx`, se robusteció el efecto de sincronización de pestañas para que siempre tome `tab=details` por defecto al navegar entre animales y fuerce la pestaña `'details'` en caso de que un animal macho reciba pestañas exclusivas de hembras (`reproduction` o `milking`).
+  - Se actualizó la misma consistencia en los enlaces a padre y madre dentro de `DetailsTab.jsx`.
+
+---
+
 ## [1.3.14-mobile-action-colors-and-fab-overlay] - 2026-09-12
 
 ### Corregido y Modificado

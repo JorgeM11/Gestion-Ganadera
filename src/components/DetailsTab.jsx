@@ -274,7 +274,7 @@ export default function DetailsTab({ animal, onEdit }) {
             {/* Padre */}
             {animal.father_id ? (
               <Link 
-                to={`/inventario/perfil?id=${animal.father_id}`} 
+                to={`/inventario/perfil?id=${animal.father_id}&tab=details`} 
                 className="group bg-neutral-50/80 hover:bg-emerald-50/50 border border-neutral-200/80 hover:border-[#1B4820]/40 rounded-2xl p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
@@ -312,7 +312,7 @@ export default function DetailsTab({ animal, onEdit }) {
             {/* Madre */}
             {animal.mother_id ? (
               <Link 
-                to={`/inventario/perfil?id=${animal.mother_id}`} 
+                to={`/inventario/perfil?id=${animal.mother_id}&tab=details`} 
                 className="group bg-neutral-50/80 hover:bg-emerald-50/50 border border-neutral-200/80 hover:border-[#1B4820]/40 rounded-2xl p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 shadow-2xs"
               >
                 <div className="flex items-center justify-between">

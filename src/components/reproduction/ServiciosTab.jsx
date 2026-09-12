@@ -112,20 +112,15 @@ export default function ServiciosTab({ animal }) {
                     <div className="flex items-center gap-2 text-xs text-neutral-600 font-medium pt-0.5 flex-wrap">
                       <span className="text-neutral-400">Padre / Pajuela:</span>
                       {service.father_id ? (
-                        service.father_number ? (
-                          <Link 
-                            to={`/inventario/perfil?id=${service.father_id}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 font-black text-[#1B4820] bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200 transition-colors"
-                          >
-                            <span>Toro #{service.father_number}</span>
-                            <ArrowUpRight className="w-3 h-3" />
-                          </Link>
-                        ) : (
-                          <span className="font-bold text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded-md">
-                            #{service.father_id.split('-')[0]}
-                          </span>
-                        )
+                        <Link 
+                          to={`/inventario/perfil?id=${service.father_id}&tab=details`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 font-black text-[#1B4820] bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200 transition-colors cursor-pointer"
+                          title="Ver detalles del toro"
+                        >
+                          <span>Toro #{service.father_number || service.father_id.split('-')[0]}</span>
+                          <ArrowUpRight className="w-3 h-3 text-[#1B4820]" />
+                        </Link>
                       ) : (
                         <span className="text-neutral-400 italic">No especificado</span>
                       )}
