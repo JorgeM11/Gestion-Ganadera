@@ -76,7 +76,7 @@ export default function LoginPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
             </span>
-            Sistema Ganadero · PWA
+            Sistema Ganadero
           </div>
 
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight m-0">
@@ -140,20 +140,27 @@ export default function LoginPage() {
             </PrimaryButton>
 
             {/* Pie de seguridad dentro de la tarjeta */}
-            <div className="mt-7 pt-5 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-400 font-medium">
-              <div className="flex items-center gap-1.5 text-neutral-500">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Autenticación local y en la nube</span>
-              </div>
-              <span className="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 font-semibold">
-                v2.0 PWA
-              </span>
-            </div>
+            
           </form>
         </div>
 
-        <p className="text-center text-[11px] text-neutral-400 mt-6 font-medium tracking-wide">
-          Plataforma Ganadera Offline-First
+        <p className="text-center text-[11px] text-neutral-500 mt-6 font-medium tracking-wide flex items-center justify-center gap-1.5 flex-wrap">
+          <span>Diseñado y desarrollado por</span>
+          <a
+            href="https://netgenteam.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 font-bold text-neutral-700 hover:text-[#1B4820] cursor-pointer transition-colors group"
+          >
+            <img
+              src="/image.png"
+              alt="NetGen Logo"
+              width={20}
+              height={20}
+              className="w-5 h-5 rounded-md object-contain shadow-2xs transition-transform group-hover:scale-105"
+            />
+            <span>NetGen</span>
+          </a>
         </p>
       </MotionDiv>
     </div>
