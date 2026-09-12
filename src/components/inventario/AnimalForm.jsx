@@ -587,7 +587,8 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
   };
 
   return (
-    <form onSubmit={handleSubmit(handleSave)} className="pb-10">
+    <>
+      <form onSubmit={handleSubmit(handleSave)} className="pb-10">
       {toast.show && (
         <div className={`fixed z-[100] px-5 py-4 ${toast.type === 'success' ? 'bg-[#1A3621]' : 'bg-red-900'} text-white rounded-2xl shadow-2xl transition-all animate-in fade-in slide-in-from-top-5 top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:-translate-x-0 font-bold text-sm flex items-center gap-3 w-[85%] max-w-sm sm:w-auto`}>
           {toast.type === 'success' ? (
@@ -1183,13 +1184,15 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
           </button>
         </div>
       )}
-
-      {/* MODAL PARA CREAR NUEVA FINCA */}
-      <FarmModal
-        isOpen={isFarmModalOpen}
-        onClose={() => setIsFarmModalOpen(false)}
-        onFarmCreated={(newFarm) => setValue('farm_id', newFarm.id)}
-      />
     </form>
-  );
+
+    {/* MODAL PARA CREAR NUEVA FINCA */}
+    <FarmModal
+      isOpen={isFarmModalOpen}
+      onClose={() => setIsFarmModalOpen(false)}
+      initialView="create"
+      onFarmCreated={(newFarm) => setValue('farm_id', newFarm.id, { shouldDirty: true, shouldValidate: true })}
+    />
+  </>
+);
 }

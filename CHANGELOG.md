@@ -4,6 +4,32 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.12-farm-creation-fix-and-modern-placeholders] - 2026-09-12
+
+### Corregido y Modificado
+- **Corrección de Creación de Finca dentro del Modal de Edición de Animal ([`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx), [`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - Resuelto el problema reportado donde al presionar "+ Nueva Finca" dentro del modal de edición de un animal, el modal se quedaba cargando indefinidamente (*"Guardando..."*) y la finca no se guardaba.
+  - **Causa Raíz Resuelta**:
+    1. `<FarmModal>` se encontraba dentro de `<form onSubmit={handleSubmit(handleSave)}>` en `AnimalForm.jsx`. En React, el evento submit de `<FarmModal>` burbujeaba al formulario padre, disparando concurrentemente una transacción de base de datos (`db.transaction`) en `AnimalForm`, lo que bloqueaba la cola de sincronización e impedía resolver `createFarm`.
+    2. El contenedor `BottomSheet` aplica estilos CSS de transformación (`transform`), lo cual atrapaba el modal con posición fija (`fixed inset-0`) dentro de las dimensiones del modal inferior en lugar de la pantalla completa.
+  - **Solución Aplicada**:
+    - Se extrajo `<FarmModal>` fuera del tag `<form>` en `AnimalForm.jsx`.
+    - Se implementó `createPortal(..., document.body)` en `FarmModal.jsx`, permitiendo que el modal flote libremente a nivel de raíz del DOM sobre cualquier capa (`z-[100]`).
+    - Se configuró el botón de guardado con `type="button"` y llamada a `onClick={handleSubmit}`, deteniendo la propagación (`e.preventDefault()`, `e.stopPropagation()`).
+    - Se incorporó la prop `initialView="create"` para que al pulsar "+ Nueva Finca" se abra directamente en el formulario de creación, y se actualice automáticamente el selector con el nuevo ID creado.
+- **Nuevas Ilustraciones Vectoriales para Placeholders de Animales ([`AnimalImage.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalImage.jsx), [`public/placeholders/`](file:///C:/Users/joses/appganadera/App-ganadera-v2/public/placeholders/))**:
+  - Se crearon y reemplazaron las imágenes de placeholder por ilustraciones vectoriales modernas con estética pastoral premium en armonía con la identidad visual de la app:
+    - **Vaca (`vaca.png`)**: Ilustración limpia de vaca en tonos verde salvia, marfil y acentos cálidos.
+    - **Toro (`toro.png`)**: Ilustración vectorial de toro con presencia robusta en la misma paleta cromática.
+    - **Becerro (`becerro.png`)**: Ilustración amigable de cría de ganado bovino para ejemplares jóvenes y crías.
+  - **Lógica Condicional Dinámica Preservada al 100%**:
+    - Si el animal tiene menos de 12 meses o se trata de una foto de nacimiento/destete -> `becerro.png`.
+    - Si es adulto Macho -> `toro.png`.
+    - Si es adulto Hembra (o por defecto) -> `vaca.png`.
+  - **Mejora Visual en el Componente**: Se modernizó el renderizado en `AnimalImage.jsx` utilizando contenedor marfil pastoral (`bg-[#eef3ec]`) con `object-cover` nítido y micro-transición suave, eliminando el antiguo difuminado opaco (`opacity-30 mix-blend-multiply`).
+
+---
+
 ## [1.3.11-ui-modern-login-refinement] - 2026-09-12
 
 ### Agregado y Modificado

@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, Building2, Plus, Users, CheckCircle2, Pencil } from 'lucide-react';
+import { X, MapPin, Building2, Plus, Users, Pencil } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { createFarm, updateFarm } from '@/lib/farmUtils';
 
-export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdated }) {
-  const [activeView, setActiveView] = useState('list'); // 'list' | 'create' | 'edit'
+export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdated, initialView = 'list' }) {
+  const [activeView, setActiveView] = useState(initialView); // 'list' | 'create' | 'edit'
   const [editingFarm, setEditingFarm] = useState(null);
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveView(initialView);
+      setError('');
+      setEditingFarm(null);
+      setName('');
+      setLocation('');
+      setDescription('');
+    }
+  }, [isOpen, initialView]);
 
   const farms = useLiveQuery(() => db.farms.filter(f => !f.deleted_at).toArray()) || [];
   const animals = useLiveQuery(() => db.animals.filter(a => !a.deleted_at).toArray()) || [];
@@ -45,7 +57,10 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdate
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     if (!name.trim()) {
       setError('El nombre de la finca es obligatorio');
       return;
@@ -77,10 +92,10 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdate
     }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           {/* Fondo oscuro con fade in / fade out suave */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -229,7 +244,14 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdate
                 )}
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit(e);
+                }}
+                className="space-y-4"
+              >
                 <div>
                   <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1 block">
                     Nombre de la Finca *
@@ -283,7 +305,8 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdate
                     Cancelar
                   </button>
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleSubmit}
                     disabled={isSaving}
                     className="flex-1 bg-[#1B4820] hover:bg-emerald-950 text-white text-xs font-bold py-3.5 rounded-xl disabled:opacity-50 transition-all shadow-sm cursor-pointer"
                   >
@@ -297,4 +320,6 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdate
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null;
 }
