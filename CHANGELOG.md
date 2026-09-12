@@ -4,6 +4,25 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.11-ui-modern-login-refinement] - 2026-09-12
+
+### Agregado y Modificado
+- **Modernización Integral de la Pantalla de Inicio de Sesión ([`Login.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Login.jsx))**:
+  - **Identidad de Marca Pastoral y Emblema Moderno**: Se diseñó un isotipo vectorial con fondo degradado verde bosque esmeralda (`#143416` a `#2B6631`), micro-sombra profunda, anillo decorativo y el tractor institucional con hover dinámico.
+  - **Insignia PWA Offline-First**: Badge flotante superior con indicador pulsante esmeralda que comunica la disponibilidad y resiliencia offline del sistema ganadero.
+  - **Atmósfera y Fondo Responsivo**: Fondo pastoral marfil (`#F5F7F2`) con orbes ambientales de luz difuminada (`blur-3xl`) en tonos esmeralda y lima, eliminando el antiguo contenedor gris rígido y ofreciendo una experiencia adaptada tanto a pantallas móviles como a monitores de escritorio.
+  - **Tarjeta de Inicio de Sesión Elevada**: Tarjeta blanca en cristal (`bg-white/95 backdrop-blur-xl`), esquinas suaves `rounded-[32px]`, borde fino y sombra dimensional suave.
+  - **Campos de Texto Enriquecidos ([`InputField.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/InputField.jsx))**:
+    - Incorporación de iconos vectoriales dedicados (`Mail` para correo y `Lock` para contraseña).
+    - Estados visuales interactivos: borde neutro suave con elevación, anillo verde corporativo (`focus-within:ring-[#1B4820]/10 focus-within:border-[#1B4820]`) al enfocar, y transición ágil en el botón de alternar visibilidad de contraseña (`Eye` / `EyeOff`).
+  - **Feedback y Alertas de Error Animadas**: La alerta de error de credenciales ahora cuenta con animación elástica de altura (`AnimatePresence` + `MotionDiv`), icono vectorial `AlertCircle` y paleta carmesí clara.
+  - **Botón de Acción Principal Modernizado ([`PrimaryButton.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ui/PrimaryButton.jsx))**:
+    - Esquinas ergonómicas `rounded-2xl`, relieve esmeralda, micro-interacción en hover con desplazamiento de flecha (`group-hover:translate-x-1`) e indicador spinner SVG estilizado durante la carga.
+  - **Pie Institucional de Seguridad**: Reaseguro visual de cifrado y sincronización local/nube junto con indicador de versión `v2.0 PWA`.
+  - **100% Fidelidad Funcional**: Mantenida intacta la lógica de autenticación con `authService`, auto-redirección de sesión activa, validación con esquema Zod y compatibilidad offline.
+
+---
+
 ## [1.3.10-genealogy-breed-and-subtle-modernization] - 2026-09-11
 
 ### Agregado y Modificado

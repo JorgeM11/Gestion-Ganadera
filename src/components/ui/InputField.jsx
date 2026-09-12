@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
@@ -36,22 +35,29 @@ export default function InputField({
   return (
     <div className="flex flex-col gap-1.5">
       {/* Label */}
-      <label
-        htmlFor={id}
-        className={`font-sans text-sm font-medium ${error ? "text-error" : "text-on-surface-variant"
+      {label && (
+        <label
+          htmlFor={id}
+          className={`font-sans text-xs font-bold uppercase tracking-wider transition-colors duration-150 ${
+            error ? "text-red-600" : "text-neutral-700"
           }`}
-      >
-        {label}
-      </label>
+        >
+          {label}
+        </label>
+      )}
 
       {/* Input wrapper */}
       <div
-        className={`relative flex items-center transition-all duration-200 bg-surface-container-lowest rounded-full min-h-[56px] outline-none ${error ? "ring-2 ring-error" : ""}`}
+        className={`group relative flex items-center transition-all duration-200 bg-neutral-50/80 hover:bg-neutral-50 focus-within:bg-white rounded-2xl min-h-[52px] border ${
+          error
+            ? "border-red-400 ring-4 ring-red-500/10"
+            : "border-neutral-200/90 hover:border-neutral-300 focus-within:border-[#1B4820] focus-within:ring-4 focus-within:ring-[#1B4820]/10 shadow-2xs"
+        }`}
       >
         {/* Left icon */}
         {Icon && (
-          <span className="absolute left-4 pointer-events-none text-outline">
-            <Icon size={20} strokeWidth={1.75} />
+          <span className="absolute left-3.5 pointer-events-none transition-colors duration-200 text-neutral-400 group-focus-within:text-[#1B4820]">
+            <Icon size={19} strokeWidth={1.85} />
           </span>
         )}
 
@@ -65,13 +71,14 @@ export default function InputField({
             error ? `${id}-error` : hint ? `${id}-hint` : undefined
           }
           {...registration}
-          className={`w-full bg-transparent outline-none text-on-surface font-sans text-base py-3.5 placeholder:text-outline-variant placeholder:font-normal placeholder:opacity-80 ${Icon ? "pl-12" : "pl-6"
-            } ${isPassword || RightIcon ? "pr-12" : "pr-6"}`}
+          className={`w-full bg-transparent outline-none text-neutral-900 font-sans text-sm sm:text-base py-3 placeholder:text-neutral-400 placeholder:font-normal placeholder:opacity-75 ${
+            Icon ? "pl-11" : "pl-4"
+          } ${isPassword || RightIcon ? "pr-12" : "pr-4"}`}
         />
 
         {RightIcon && !isPassword && (
-          <span className="absolute right-4 pointer-events-none text-on-surface-variant">
-           <RightIcon size={20} strokeWidth={1.75} />
+          <span className="absolute right-3.5 pointer-events-none text-neutral-400">
+            <RightIcon size={19} strokeWidth={1.85} />
           </span>
         )}
 
@@ -81,12 +88,12 @@ export default function InputField({
             type="button"
             aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 flex items-center justify-center p-2 rounded-full transition-colors duration-150 text-outline bg-transparent border-none cursor-pointer"
+            className="absolute right-2.5 flex items-center justify-center p-2 rounded-xl transition-all duration-150 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 active:scale-95 bg-transparent border-none cursor-pointer"
           >
             {showPassword ? (
-              <EyeOff size={20} strokeWidth={1.75} />
+              <EyeOff size={18} strokeWidth={1.85} />
             ) : (
-              <Eye size={20} strokeWidth={1.75} />
+              <Eye size={18} strokeWidth={1.85} />
             )}
           </button>
         )}
@@ -94,7 +101,7 @@ export default function InputField({
 
       {/* Hint text */}
       {hint && !error && (
-        <p id={`${id}-hint`} className="font-sans text-xs text-on-surface-variant m-0 leading-4">
+        <p id={`${id}-hint`} className="font-sans text-xs text-neutral-500 m-0 leading-4">
           {hint}
         </p>
       )}
@@ -104,9 +111,9 @@ export default function InputField({
         <p
           id={`${id}-error`}
           role="alert"
-          className="flex items-center gap-1.5 font-sans text-[0.8125rem] text-error m-0"
+          className="flex items-center gap-1.5 font-sans text-xs font-medium text-red-600 m-0 mt-0.5"
         >
-          <AlertCircle size={14} strokeWidth={2} className="shrink-0" />
+          <AlertCircle size={13} strokeWidth={2} className="shrink-0 text-red-500" />
           {error}
         </p>
       )}
