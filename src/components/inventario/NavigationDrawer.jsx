@@ -35,7 +35,7 @@ export default function NavigationDrawer({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="fixed inset-0 z-[70] overflow-hidden">
           {/* Overlay oscuro de fondo */}
           <MotionDiv
             initial={{ opacity: 0 }}
@@ -102,7 +102,6 @@ export default function NavigationDrawer({
                 <button
                   type="button"
                   onClick={() => {
-                    onClose();
                     if (onOpenFarms) onOpenFarms();
                   }}
                   className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:bg-neutral-100 transition-all cursor-pointer"
@@ -122,7 +121,6 @@ export default function NavigationDrawer({
                 <button
                   type="button"
                   onClick={() => {
-                    onClose();
                     if (onOpenMilking) onOpenMilking();
                   }}
                   className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold text-neutral-700 hover:bg-neutral-100 transition-all cursor-pointer"

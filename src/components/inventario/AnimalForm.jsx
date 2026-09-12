@@ -941,7 +941,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
             <div>
               <h3 className="text-base sm:text-lg font-bold text-[#1B4820] flex items-center gap-2">
                 <GiCow className="w-5 h-5 text-emerald-600" />
-                Evento: Nacimiento
+                Nacimiento
               </h3>
               <p className="text-[11px] text-neutral-400 font-medium">Pesaje inicial y datos del parto</p>
             </div>
@@ -1039,7 +1039,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
             <div>
               <h3 className="text-base sm:text-lg font-bold text-[#1B4820] flex items-center gap-1.5">
                 <Milk className="w-4 h-4 text-amber-600" />
-                Evento: Destete
+                Destete
               </h3>
               <p className="text-[11px] text-neutral-400 font-medium">Pesaje y evaluación al destetar</p>
             </div>

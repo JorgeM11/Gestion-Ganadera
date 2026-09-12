@@ -4,6 +4,26 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.13-visual-and-drawer-refinements] - 2026-09-12
+
+### Corregido y Modificado
+- **Simplificación de Textos en Botones de Formularios de Eventos ([`EventForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/EventForm.jsx), [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx))**:
+  - En el formulario de eventos (`EventForm.jsx`), se acortó el texto del botón principal de acción a solo `"Guardar"` (al editar) o `"Registrar"` (al crear nuevo), eliminando palabras redundantes y evitando que el botón quede sobrecargado.
+  - Se replicó la misma síntesis en el modal de ordeño (`MilkingModal.jsx`).
+- **Jerarquía de Capas (Z-Index) entre Botón Flotante y Barra Lateral ([`Inventario.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Inventario.jsx), [`NavigationDrawer.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/NavigationDrawer.jsx))**:
+  - Se redujo el `z-index` del contenedor del botón flotante de acción (FAB) de `z-50` a `z-30`.
+  - Se elevó la barra lateral desplegable (`NavigationDrawer`) a `z-[70]`, garantizando que tanto el panel lateral como su backdrop queden estrictamente por encima del botón flotante y de la barra inferior de navegación.
+- **Apertura Fluida de Modales desde la Barra Lateral sin Animación de Cierre Competitiva ([`NavigationDrawer.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/NavigationDrawer.jsx), [`MilkingModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/MilkingModal.jsx))**:
+  - Al abrir los modales de "Fincas" o de "Ordeño" desde la barra lateral, ya no se invoca el cierre forzado de la barra lateral en el mismo frame.
+  - Esto elimina el lag y la ralentización causados por la colisión de la animación de salida de Framer Motion de la barra con la animación elástica de entrada del modal.
+  - Se trasladó `MilkingModal` a `createPortal(..., document.body)` con capa superior `z-[100]`, montándose limpia y fluidamente sobre la barra lateral sin interferencias visuales.
+- **Simplificación de Encabezados en Registro de Animal ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - Se removió la palabra `"Evento: "` en los acordeones del formulario de alta/edición de animal, quedando identificados de manera concisa como `"Nacimiento"` y `"Destete"`.
+- **Ajuste de Opacidad y Contraste de Siluetas Placeholders ([`AnimalImage.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalImage.jsx))**:
+  - Se ajustó la presencia visual de las siluetas originales de placeholders (`vaca.png`, `toro.png`, `becerro.png`) pasando de `opacity-30` a `opacity-50 mix-blend-multiply drop-shadow-sm`, logrando un tono sutilmente más oscuro y definido sin perder la estética limpia.
+
+---
+
 ## [1.3.12-farm-creation-fix-and-deploy-resolution] - 2026-09-12
 
 ### Corregido y Modificado

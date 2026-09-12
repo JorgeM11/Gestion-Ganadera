@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Milk } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -100,10 +101,10 @@ export default function MilkingModal({
     }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           {/* Backdrop con fade in / fade out suave */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -249,7 +250,7 @@ export default function MilkingModal({
                   disabled={isSaving}
                   className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-[#1B4820] hover:bg-emerald-950 transition-colors shadow-md disabled:opacity-50 cursor-pointer"
                 >
-                  {isSaving ? 'Guardando...' : (recordToEdit ? 'Guardar Cambios' : 'Guardar Registro')}
+                  {isSaving ? 'Guardando...' : (recordToEdit ? 'Guardar' : 'Registrar')}
                 </button>
               </div>
             </form>
@@ -258,4 +259,6 @@ export default function MilkingModal({
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null;
 }

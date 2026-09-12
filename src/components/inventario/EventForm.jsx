@@ -542,7 +542,7 @@ export default function EventForm({
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>{isEditing ? 'Guardar Cambios' : 'Registrar Evento'}</span>
+                <span>{isEditing ? 'Guardar' : 'Registrar'}</span>
               </>
             )}
           </button>

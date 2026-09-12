@@ -73,7 +73,7 @@ export default function AnimalImage({
         <img
           src={placeholderSrc}
           alt="Silueta"
-          className="w-full h-full p-[18%] object-contain opacity-30 mix-blend-multiply drop-shadow-sm transition-all"
+          className="w-full h-full p-[18%] object-contain opacity-50 mix-blend-multiply drop-shadow-sm transition-all"
         />
       </div>
     );
