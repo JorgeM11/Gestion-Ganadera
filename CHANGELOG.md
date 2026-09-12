@@ -4,29 +4,24 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
-## [1.3.12-farm-creation-fix-and-modern-placeholders] - 2026-09-12
+## [1.3.12-farm-creation-fix-and-deploy-resolution] - 2026-09-12
 
 ### Corregido y Modificado
+- **Resolución de Error de Despliegue en Vercel ([`package.json`](file:///C:/Users/joses/appganadera/App-ganadera-v2/package.json), [`.npmrc`](file:///C:/Users/joses/appganadera/App-ganadera-v2/.npmrc))**:
+  - Resuelto el conflicto de dependencias peer en Vercel (`npm error Conflicting peer dependency: vite@7.3.6 from vite-plugin-pwa@1.2.0`).
+  - **Causa**: `vite-plugin-pwa@1.2.0` solicita `peer vite@"^3.1.0 || ... || ^7.0.0"`, mientras que `@vitejs/plugin-react@6` requiere `vite@^8.0.0`. En entornos CI como Vercel, npm v7+ aplica resolución estricta de peer dependencies (`eresolve`) y falla durante `npm install`.
+  - **Solución**: Se añadió archivo [`.npmrc`](file:///C:/Users/joses/appganadera/App-ganadera-v2/.npmrc) con `legacy-peer-deps=true` y se configuró `"overrides"` en [`package.json`](file:///C:/Users/joses/appganadera/App-ganadera-v2/package.json) para `vite-plugin-pwa`, asegurando una instalación y compilación limpia y sin conflictos en Vercel.
 - **Corrección de Creación de Finca dentro del Modal de Edición de Animal ([`FarmModal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/FarmModal.jsx), [`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
-  - Resuelto el problema reportado donde al presionar "+ Nueva Finca" dentro del modal de edición de un animal, el modal se quedaba cargando indefinidamente (*"Guardando..."*) y la finca no se guardaba.
-  - **Causa Raíz Resuelta**:
-    1. `<FarmModal>` se encontraba dentro de `<form onSubmit={handleSubmit(handleSave)}>` en `AnimalForm.jsx`. En React, el evento submit de `<FarmModal>` burbujeaba al formulario padre, disparando concurrentemente una transacción de base de datos (`db.transaction`) en `AnimalForm`, lo que bloqueaba la cola de sincronización e impedía resolver `createFarm`.
-    2. El contenedor `BottomSheet` aplica estilos CSS de transformación (`transform`), lo cual atrapaba el modal con posición fija (`fixed inset-0`) dentro de las dimensiones del modal inferior en lugar de la pantalla completa.
-  - **Solución Aplicada**:
-    - Se extrajo `<FarmModal>` fuera del tag `<form>` en `AnimalForm.jsx`.
-    - Se implementó `createPortal(..., document.body)` en `FarmModal.jsx`, permitiendo que el modal flote libremente a nivel de raíz del DOM sobre cualquier capa (`z-[100]`).
-    - Se configuró el botón de guardado con `type="button"` y llamada a `onClick={handleSubmit}`, deteniendo la propagación (`e.preventDefault()`, `e.stopPropagation()`).
-    - Se incorporó la prop `initialView="create"` para que al pulsar "+ Nueva Finca" se abra directamente en el formulario de creación, y se actualice automáticamente el selector con el nuevo ID creado.
-- **Nuevas Ilustraciones Vectoriales para Placeholders de Animales ([`AnimalImage.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalImage.jsx), [`public/placeholders/`](file:///C:/Users/joses/appganadera/App-ganadera-v2/public/placeholders/))**:
-  - Se crearon y reemplazaron las imágenes de placeholder por ilustraciones vectoriales modernas con estética pastoral premium en armonía con la identidad visual de la app:
-    - **Vaca (`vaca.png`)**: Ilustración limpia de vaca en tonos verde salvia, marfil y acentos cálidos.
-    - **Toro (`toro.png`)**: Ilustración vectorial de toro con presencia robusta en la misma paleta cromática.
-    - **Becerro (`becerro.png`)**: Ilustración amigable de cría de ganado bovino para ejemplares jóvenes y crías.
-  - **Lógica Condicional Dinámica Preservada al 100%**:
-    - Si el animal tiene menos de 12 meses o se trata de una foto de nacimiento/destete -> `becerro.png`.
-    - Si es adulto Macho -> `toro.png`.
-    - Si es adulto Hembra (o por defecto) -> `vaca.png`.
-  - **Mejora Visual en el Componente**: Se modernizó el renderizado en `AnimalImage.jsx` utilizando contenedor marfil pastoral (`bg-[#eef3ec]`) con `object-cover` nítido y micro-transición suave, eliminando el antiguo difuminado opaco (`opacity-30 mix-blend-multiply`).
+  - Resuelto el bug donde al presionar "+ Nueva Finca" dentro del modal de edición de animal, el modal se quedaba cargando indefinidamente (*"Guardando..."*) y la finca no se creaba.
+  - Se extrajo `<FarmModal>` fuera del tag `<form>` en `AnimalForm.jsx`.
+  - Se implementó `createPortal(..., document.body)` en `FarmModal.jsx` para proyectarlo en el body con `z-[100]`.
+  - Se configuró el botón con `type="button" onClick={handleSubmit}` y detención de propagación de eventos (`e.preventDefault()`, `e.stopPropagation()`).
+  - Se añadió la prop `initialView="create"` para abrir directo en la pantalla de nueva finca y actualización reactiva del selector.
+- **Genealogía y Manejo de Familiares no Registrados ([`GenealogyTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/GenealogyTab.jsx))**:
+  - Se implementó soporte de género y edad para todos los nodos del árbol genealógico (macho $\rightarrow$ silueta toro, hembra $\rightarrow$ silueta vaca, cría $\rightarrow$ becerro).
+  - Para familiares no registrados o inexistentes, se muestra la silueta gris correspondiente a su género (ej. toro para padre/abuelo ausente, vaca para madre/abuela ausente), con borde discontinuo (`border-dashed border-neutral-300`), `#---` y distintivo *"Sin registrar"*.
+- **Mantenimiento de Siluetas Placeholders Originales ([`AnimalImage.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalImage.jsx), [`public/placeholders/`](file:///C:/Users/joses/appganadera/App-ganadera-v2/public/placeholders/))**:
+  - Se mantuvieron las siluetas originales en escala de grises con fondo circular (`vaca.png`, `toro.png`, `becerro.png`), conservando el renderizado clásico de la app (`bg-[#E5E7EB] opacity-30 mix-blend-multiply`), y se eliminaron los archivos temporales generados.
 
 ---
 

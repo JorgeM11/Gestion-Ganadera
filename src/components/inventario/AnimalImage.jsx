@@ -69,14 +69,11 @@ export default function AnimalImage({
   // --- RENDER ---
   if (!imgSrc || imgError) {
     return (
-      <div className={`flex items-center justify-center bg-[#eef3ec] w-full h-full overflow-hidden ${className}`}>
+      <div className={`flex items-center justify-center bg-[#E5E7EB] w-full h-full ${className}`}>
         <img
           src={placeholderSrc}
-          alt={alt || (isBecerro ? "Becerro" : (finalSex === 'Macho' ? "Toro" : "Vaca"))}
-          className="w-full h-full object-cover transition-transform duration-300"
-          onError={(e) => {
-            e.currentTarget.style.opacity = '0';
-          }}
+          alt="Silueta"
+          className="w-full h-full p-[18%] object-contain opacity-30 mix-blend-multiply drop-shadow-sm transition-all"
         />
       </div>
     );
