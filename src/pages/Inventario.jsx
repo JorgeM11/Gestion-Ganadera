@@ -106,6 +106,13 @@ export default function InventarioPage() {
   // --- ESTADO DE PAGINACIÓN ---
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Asegurar scroll al inicio al cambiar de página
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, [currentPage]);
+
   // --- ESTADOS PARA BATCH MODE ---
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [selectedAnimalIds, setSelectedAnimalIds] = useState(new Set());

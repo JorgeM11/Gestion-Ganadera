@@ -79,8 +79,8 @@ export default function EvolutionTab({ animal }) {
             <TrendingUp className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1B4820] leading-tight">Evolución</h2>
-            <p className="text-xs text-neutral-400 font-medium">Historial cronológico de pesajes y desarrollo</p>
+            <h2 className="text-lg sm:text-3xl font-black text-[#1B4820] leading-tight">Evolución</h2>
+            <p className="text-xs text-neutral-400 font-medium">Historial cronológico</p>
           </div>
         </div>
         <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10">
@@ -134,16 +134,6 @@ export default function EvolutionTab({ animal }) {
                           <badge.icon className="w-3.5 h-3.5" />
                           <span>{event.event_type}</span>
                         </span>
-                        {weightDiff !== null && (
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black border ${
-                            Number(weightDiff) >= 0 
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' 
-                              : 'bg-rose-50 text-rose-800 border-rose-200/80'
-                          }`}>
-                            {Number(weightDiff) >= 0 ? <TrendingUp className="w-3 h-3 text-emerald-600" /> : <TrendingDown className="w-3 h-3 text-rose-600" />}
-                            <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
-                          </span>
-                        )}
                         {!(event.photo_blob || event.photo_path) && (
                           <span className="text-xs font-bold text-neutral-400 flex items-center gap-1">
                             <Calendar className="w-3.5 h-3.5 text-neutral-400" />
@@ -166,7 +156,16 @@ export default function EvolutionTab({ animal }) {
                           icon={Scale} 
                           label="Peso" 
                           value={formatWeight(event.weight_kg)}
-                          
+                          delta={weightDiff !== null && (
+                            <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-black border leading-none shrink-0 ${
+                              Number(weightDiff) >= 0 
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' 
+                                : 'bg-rose-50 text-rose-800 border-rose-200/80'
+                            }`}>
+                              {Number(weightDiff) >= 0 ? <TrendingUp className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <TrendingDown className="w-2.5 h-2.5 text-rose-600 shrink-0" />}
+                              <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
+                            </span>
+                          )}
                         />
                       )}
                       {event.mother_weight_kg && (
@@ -303,7 +302,7 @@ function DataBox({ icon: Icon, label, value, delta }) {
         <Icon className="w-3.5 h-3.5 text-[#1B4820]/70 shrink-0" />
         <p className="text-[10px] font-black uppercase tracking-wider truncate">{label}</p>
       </div>
-      <div className="flex items-baseline gap-1.5 flex-wrap">
+      <div className="flex flex-col items-start gap-1">
         <span className="text-sm sm:text-base font-black text-neutral-800 leading-none">{value}</span>
         {delta}
       </div>

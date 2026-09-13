@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SyncManager from '@/components/providers/SyncManager';
+import ScrollToTop from '@/components/providers/ScrollToTop';
 
 // Importaremos las páginas
 import Login from './pages/Login';
@@ -23,6 +24,9 @@ function ProtectedRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Restablecimiento de scroll al inicio en cada cambio de ruta/parámetros */}
+      <ScrollToTop />
+
       {/* Manejador de sincronización en segundo plano */}
       <SyncManager />
 

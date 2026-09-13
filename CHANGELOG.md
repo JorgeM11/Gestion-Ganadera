@@ -4,6 +4,25 @@ Este documento registra de forma cronológica todas las modificaciones, mejoras,
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.3.16-responsive-weight-pill-and-scroll-restoration] - 2026-09-13
+
+### Agregado y Modificado
+- **Píldora Compacta de Diferencial de Peso bajo el Peso ([`EvolutionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/EvolutionTab.jsx))**:
+  - Se removió la insignia de diferencial de peso (`weightDiff`) de la cabecera de las tarjetas de eventos para liberar espacio y evitar saltos de línea indeseados en pantallas móviles.
+  - Se ubicó la píldora de diferencia de peso (`+X.X kg` / `-X.X kg`) directamente **debajo del valor del peso** dentro del recuadro `DataBox`, formateada en tamaño ultra compacto (`text-[10px]`, icono `w-2.5 h-2.5`, padding reducido `px-1.5 py-0.5` con alineación en columna `flex flex-col items-start gap-1`), preservando la armonía visual y evitando cualquier desbordamiento responsive en pantallas estrechas.
+- **Adaptabilidad Responsiva de Sugerencia Genética ([`AnimalForm.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/inventario/AnimalForm.jsx))**:
+  - Resuelto el problema donde el texto de la raza recomendada se cortaba y resultaba ilegible en teléfonos móviles debido a la clase `truncate` y a la colisión horizontal con los botones de acción.
+  - Se rediseñó el banner con una cuadrícula adaptable `flex flex-col sm:flex-row sm:items-center justify-between gap-3`.
+  - Se eliminó el truncamiento forzado, permitiendo salto de línea natural (`leading-snug break-words font-bold`) para que nombres compuestos como *"F1 (50% Brahman - 50% Nelore)"* o *"Mestizo (50% Brahman, 25% Guzerá)"* se lean completos y claros en cualquier resolución móvil.
+  - El botón *"Aplicar"* ahora se expande a ancho completo ergonómico en teléfonos con icono de confirmación y el botón de descartar ("X") se posicionó en la esquina superior derecha, preservando el layout compacto en pantallas grandes.
+- **Restablecimiento Global de Scroll al Inicio en Cambios de Módulo y Pestañas ([`ScrollToTop.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/providers/ScrollToTop.jsx), [`App.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/App.jsx), [`PerfilAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/PerfilAnimal.jsx), [`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx), [`HealthTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/HealthTab.jsx), [`Inventario.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Inventario.jsx))**:
+  - Se creó el proveedor global [`ScrollToTop.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/providers/ScrollToTop.jsx) integrado en [`App.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/App.jsx), el cual detecta cada cambio de ruta (`pathname`) y parámetros de consulta (`search`) para ejecutar un restablecimiento instantáneo a la posición superior (`top: 0, left: 0`) en `window`, `document.documentElement`, `document.body` y contenedores principales.
+  - En [`PerfilAnimal.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/PerfilAnimal.jsx), se aseguró el scroll a la cabecera tanto en la función de selección de pestaña (`handleTabChange`) como en el efecto reactivo ante cambios de `activeTab` o `animalId`.
+  - En [`ReproductionTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/ReproductionTab.jsx), se configuró `handleSubTabChange` para volver al inicio superior de la pantalla cada vez que el usuario conmuta entre las sub-pestañas *Partos*, *Palpación* y *Servicios*.
+  - En [`HealthTab.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/components/HealthTab.jsx) e [`Inventario.jsx`](file:///C:/Users/joses/appganadera/App-ganadera-v2/src/pages/Inventario.jsx), se sincronizó la vista al inicio al filtrar categorías sanitarias o paginar entre hojas del inventario de ganado.
+
+---
+
 ## [1.3.15-bull-redirection-to-details-tab] - 2026-09-12
 
 ### Corregido y Modificado

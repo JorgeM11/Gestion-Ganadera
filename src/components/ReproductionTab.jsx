@@ -45,6 +45,13 @@ export default function ReproductionTab({ animal }) {
 
 
 
+  const handleSubTabChange = (tabId) => {
+    setActiveSubTab(tabId);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  };
+
   const subTabs = [
     { id: 'partos', label: 'Partos', count: offspringCount, icon: GiCow },
     { id: 'tactos', label: 'Palpación', count: checks.length, icon: Stethoscope },
@@ -63,8 +70,8 @@ export default function ReproductionTab({ animal }) {
             <FaVenusMars className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1B4820] leading-tight">Registro Reproductivo</h2>
-            <p className="text-xs text-neutral-400 font-medium">Control de partos, palpaciones y servicios</p>
+            <h2 className="text-lg sm:text-3xl font-black text-[#1B4820] leading-tight">Registro Reproductivo</h2>
+            <p className="text-xs text-neutral-400 font-medium">Control de reproducción</p>
           </div>
         </div>
         <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10 shadow-2xs">
@@ -81,7 +88,7 @@ export default function ReproductionTab({ animal }) {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
+              onClick={() => handleSubTabChange(tab.id)}
               className={`relative flex items-center cursor-pointer justify-center gap-1 sm:gap-2 px-1.5 py-2 sm:px-4 sm:py-2.5 rounded-full font-bold text-[9.5px] sm:text-xs uppercase tracking-tight sm:tracking-wider transition-colors select-none active:scale-95 w-full sm:w-auto ${
                 isActive
                   ? 'text-white'

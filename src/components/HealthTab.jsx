@@ -146,8 +146,8 @@ export default function HealthTab({ animal }) {
             <ShieldPlus className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1B4820] leading-tight">Carnet de Salud</h2>
-            <p className="text-xs text-neutral-400 font-medium">Historial clínico y tratamientos aplicados</p>
+            <h2 className="text-lg sm:text-3xl font-black text-[#1B4820] leading-tight">Carnet de Salud</h2>
+            <p className="text-xs text-neutral-400 font-medium">Historial clínico</p>
           </div>
         </div>
         <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10 shadow-2xs">
@@ -209,7 +209,12 @@ export default function HealthTab({ animal }) {
           return (
             <button
               key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
+              onClick={() => {
+                setSelectedCategory(cat.id);
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                if (document.documentElement) document.documentElement.scrollTop = 0;
+                if (document.body) document.body.scrollTop = 0;
+              }}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer select-none active:scale-95 ${
                 isActive
                   ? 'bg-[#1B4820] text-white shadow-md shadow-[#1B4820]/20'

@@ -34,6 +34,9 @@ function ProfileContent() {
       next.set('tab', tabId);
       return next;
     }, { replace: true });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
   }, [setSearchParams]);
 
   // --- SISTEMA DE MODAL RECURSIVO (idéntico a NuevoAnimal.jsx) ---
@@ -74,6 +77,13 @@ function ProfileContent() {
       setActiveTab(tab);
     }
   }, [searchParams, animal]);
+
+  // Restablecer scroll al inicio siempre que cambie de pestaña o de animal
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, [activeTab, animalId]);
 
   // Mientras carga el animal inicial o si no hay ID en la URL
   if (animal === undefined || !animalId) {

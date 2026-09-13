@@ -803,28 +803,46 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
               transition={{ duration: 0.22, ease: 'easeInOut' }}
               className="overflow-hidden"
             >
-              <div className="bg-white border border-amber-300/80 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-2 rounded-xl bg-amber-100 text-amber-700 shrink-0">
+              <div className="bg-amber-50/70 border border-amber-300/80 p-3.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                  <div className="p-2 rounded-xl bg-amber-100 text-amber-800 shrink-0 mt-0.5">
                     <Sparkles className="w-4 h-4" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Cálculo Genético Heredado</p>
-                    <p className="text-xs text-neutral-700 font-bold truncate">{geneticSuggestion.label}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2 sm:block">
+                      <p className="text-[10px] font-black text-amber-900 uppercase tracking-wider">
+                        Cálculo Genético Heredado
+                      </p>
+                      {/* Botón X para cerrar en móvil */}
+                      <button
+                        type="button"
+                        onClick={() => setGeneticSuggestion(null)}
+                        className="sm:hidden p-1 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-amber-100/60 transition-colors cursor-pointer -mr-1 -mt-1"
+                        title="Cerrar sugerencia"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <p className="text-xs sm:text-sm text-neutral-800 font-bold leading-snug break-words mt-0.5">
+                      {geneticSuggestion.label}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
+
+                <div className="flex items-center gap-2 shrink-0 sm:self-center">
                   <button
                     type="button"
                     onClick={handleApplySuggestion}
-                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-2xs"
+                    className="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
                   >
-                    Aplicar
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Aplicar</span>
                   </button>
+                  {/* Botón X para cerrar en desktop */}
                   <button
                     type="button"
                     onClick={() => setGeneticSuggestion(null)}
-                    className="p-1.5 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors cursor-pointer"
+                    className="hidden sm:flex p-1.5 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-amber-100/60 transition-colors cursor-pointer"
                     title="Cerrar sugerencia"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -943,7 +961,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
                 <GiCow className="w-5 h-5 text-emerald-600" />
                 Nacimiento
               </h3>
-              <p className="text-[11px] text-neutral-400 font-medium">Pesaje inicial y datos del parto</p>
+              
             </div>
           </div>
           <div className="flex items-center gap-2.5">
@@ -1041,7 +1059,7 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
                 <Milk className="w-4 h-4 text-amber-600" />
                 Destete
               </h3>
-              <p className="text-[11px] text-neutral-400 font-medium">Pesaje y evaluación al destetar</p>
+              
             </div>
           </div>
           <div className="flex items-center gap-2.5">

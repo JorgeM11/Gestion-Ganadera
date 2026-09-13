@@ -84,8 +84,8 @@ export default function MilkingTab({ animal }) {
             <Milk className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1B4820] leading-tight">Control de Ordeño</h2>
-            <p className="text-xs text-neutral-400 font-medium">Historial y pesadas de cada turno</p>
+            <h2 className="text-lg sm:text-3xl font-black text-[#1B4820] leading-tight">Control de Ordeño</h2>
+            <p className="text-xs text-neutral-400 font-medium">Historial</p>
           </div>
         </div>
         <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10 shadow-2xs">

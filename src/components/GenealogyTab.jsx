@@ -121,8 +121,8 @@ export default function GenealogyTab({ animal }) {
             <Share2 className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1B4820] leading-tight">Árbol Genealógico</h2>
-            <p className="text-xs text-neutral-400 font-medium">Línea de ascendencia y descendencia directa</p>
+            <h2 className="text-lg sm:text-3xl font-black text-[#1B4820] leading-tight">Árbol Genealógico</h2>
+            <p className="text-xs text-neutral-400 font-medium">Genealogía</p>
           </div>
         </div>
         <div className="bg-[#EEF7EE] px-3.5 py-1.5 rounded-2xl text-[#1B4820] font-black text-base border border-[#1B4820]/10 shadow-2xs">
@@ -207,4 +207,4 @@ export default function GenealogyTab({ animal }) {
       </div>
     </div>
   );
-}
+}
