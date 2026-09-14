@@ -150,23 +150,27 @@ export default function EvolutionTab({ animal }) {
                     </div>
 
                     {/* Métricas Principales */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 items-start">
                       {event.weight_kg !== null && event.weight_kg !== undefined && (
-                        <DataBox 
-                          icon={Scale} 
-                          label="Peso" 
-                          value={formatWeight(event.weight_kg)}
-                          delta={weightDiff !== null && (
-                            <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-black border leading-none shrink-0 ${
-                              Number(weightDiff) >= 0 
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' 
-                                : 'bg-rose-50 text-rose-800 border-rose-200/80'
-                            }`}>
-                              {Number(weightDiff) >= 0 ? <TrendingUp className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <TrendingDown className="w-2.5 h-2.5 text-rose-600 shrink-0" />}
-                              <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
-                            </span>
+                        <div className="flex flex-col gap-1.5 min-w-0">
+                          <DataBox 
+                            icon={Scale} 
+                            label="Peso" 
+                            value={formatWeight(event.weight_kg)}
+                          />
+                          {weightDiff !== null && (
+                            <div className="flex items-center px-0.5">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black border leading-none shrink-0 ${
+                                Number(weightDiff) >= 0 
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80' 
+                                  : 'bg-rose-50 text-rose-800 border-rose-200/80'
+                              }`}>
+                                {Number(weightDiff) >= 0 ? <TrendingUp className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <TrendingDown className="w-2.5 h-2.5 text-rose-600 shrink-0" />}
+                                <span>{Number(weightDiff) >= 0 ? `+${weightDiff} kg` : `${weightDiff} kg`}</span>
+                              </span>
+                            </div>
                           )}
-                        />
+                        </div>
                       )}
                       {event.mother_weight_kg && (
                         <DataBox icon={Scale} label="Peso Madre" value={formatWeight(event.mother_weight_kg)} />
@@ -295,17 +299,14 @@ export default function EvolutionTab({ animal }) {
   );
 }
 
-function DataBox({ icon: Icon, label, value, delta }) {
+function DataBox({ icon: Icon, label, value }) {
   return (
     <div className="bg-neutral-50 p-2.5 sm:p-3 rounded-2xl border border-neutral-100/90 flex flex-col justify-between min-w-0">
       <div className="flex items-center gap-1.5 text-neutral-400 mb-1.5">
         <Icon className="w-3.5 h-3.5 text-[#1B4820]/70 shrink-0" />
         <p className="text-[10px] font-black uppercase tracking-wider truncate">{label}</p>
       </div>
-      <div className="flex flex-col items-start gap-1">
-        <span className="text-sm sm:text-base font-black text-neutral-800 leading-none">{value}</span>
-        {delta}
-      </div>
+      <p className="text-sm sm:text-base font-black text-neutral-800 leading-none">{value}</p>
     </div>
   );
 }

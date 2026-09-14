@@ -100,6 +100,43 @@ export default function InventarioPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Detección reactiva de Desktop (breakpoint lg: 1024px)
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Bloquear scroll de fondo cuando los filtros están abiertos en móvil
+  useEffect(() => {
+    if (isFilterOpen && !isDesktop) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isFilterOpen, isDesktop]);
+
+  // Variantes para móvil: Bottom Sheet que entra desde el fondo y se cierra arrastrando hacia abajo
+  const mobileFilterVariants = {
+    initial: { y: '100%' },
+    animate: { y: 0 },
+    exit: { y: '100%' }
+  };
+
+  // Variantes para escritorio: Panel flotante superior derecho
+  const desktopFilterVariants = {
+    initial: { opacity: 0, y: 20, scale: 0.98 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: 20, scale: 0.98 }
+  };
+
   // Custom Hook para Respaldo Forzado
   const { isResyncing, resyncSuccess, handleForceSync } = useForceResync();
 
@@ -377,16 +414,28 @@ export default function InventarioPage() {
       <AnimatePresence>
         {isFilterOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            variants={isDesktop ? desktopFilterVariants : mobileFilterVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={isDesktop 
+              ? { duration: 0.2, ease: "easeOut" }
+              : { type: "spring", damping: 28, stiffness: 280 }
+            }
+            drag={!isDesktop ? "y" : false}
+            dragConstraints={{ top: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              if (!isDesktop && (info.offset.y > 100 || info.velocity.y > 300)) {
+                setIsFilterOpen(false);
+              }
+            }}
             className="fixed z-[60] bg-white flex flex-col shadow-2xl
                        bottom-0 left-0 w-full max-h-[85vh] rounded-t-[2rem]
                        lg:bottom-auto lg:top-24 lg:right-8 lg:left-auto lg:w-96 lg:h-auto lg:max-h-[calc(100vh-8rem)] lg:rounded-[2rem] lg:border lg:border-neutral-200"
           >
-            <div className="w-full flex justify-center pt-3 pb-2 lg:hidden">
-              <div className="w-12 h-1.5 bg-neutral-200 rounded-full"></div>
+            <div className="w-full flex justify-center pt-3.5 pb-2 lg:hidden cursor-grab active:cursor-grabbing">
+              <div className="w-12 h-1.5 bg-neutral-300 rounded-full"></div>
             </div>
 
             <div className="px-6 pt-2 lg:pt-6 pb-4 flex items-center justify-between border-b border-neutral-100">
@@ -402,7 +451,7 @@ export default function InventarioPage() {
                 <button 
                   type="button"
                   onClick={() => setIsFilterOpen(false)} 
-                  className="hidden lg:flex p-1.5 hover:bg-neutral-100 rounded-lg text-neutral-500 cursor-pointer"
+                  className="flex p-1.5 hover:bg-neutral-100 rounded-lg text-neutral-500 cursor-pointer"
                   title="Cerrar filtros"
                 >
                   <X className="w-5 h-5" />
