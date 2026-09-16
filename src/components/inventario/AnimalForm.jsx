@@ -95,8 +95,19 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
   const [activeAccordions, setActiveAccordions] = useState({ birth: false, weaning: false, service: false });
   const [eventIds, setEventIds] = useState({ birth: null, weaning: null });
 
+  const initialMainPreview = useMemo(() => {
+    if (initialValues?.photo_blob) {
+      try {
+        return URL.createObjectURL(initialValues.photo_blob);
+      } catch (e) {
+        return initialValues?.photo_path || null;
+      }
+    }
+    return initialValues?.photo_path || null;
+  }, [initialValues?.photo_blob, initialValues?.photo_path]);
+
   const [images, setImages] = useState({
-    main: { blob: null, preview: initialValues?.photo_path || null, isModified: false },
+    main: { blob: null, preview: initialMainPreview, isModified: false },
     birth: { blob: null, preview: null, isModified: false },
     weaning: { blob: null, preview: null, isModified: false }
   });
@@ -262,8 +273,15 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
 
       // Imagen Principal
       if (initialValues.photo_blob) {
-        const url = URL.createObjectURL(initialValues.photo_blob);
-        setImages(prev => ({ ...prev, main: { ...prev.main, preview: url } }));
+        try {
+          const url = URL.createObjectURL(initialValues.photo_blob);
+          setImages(prev => {
+            if (prev.main.isModified) return prev;
+            return { ...prev, main: { ...prev.main, preview: url } };
+          });
+        } catch (e) {
+          // ignore
+        }
       }
 
       if (birth) {
@@ -453,18 +471,21 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
 
       // Si ha sido modificado, el photo_path debe ser null para que el proceso de sincronización 
       // lo detecte como algo nuevo que debe subir (o para eliminarlo si es null).
-      const mainImg = {
-        blob: images.main.blob || null,
-        url: images.main.isModified ? null : (isEditing ? initialValues?.photo_path : null)
-      };
+      const photoBlobToSave = images.main.isModified
+        ? (images.main.blob || null)
+        : (isEditing ? (initialValues?.photo_blob || null) : null);
+
+      const photoPathToSave = images.main.isModified
+        ? null
+        : (isEditing ? (initialValues?.photo_path || null) : null);
 
       const birthImg = {
-        blob: images.birth.isModified ? images.birth.blob : existingEventPhotos.current.birth.blob,
+        blob: images.birth.isModified ? (images.birth.blob || null) : existingEventPhotos.current.birth.blob,
         url: images.birth.isModified ? null : existingEventPhotos.current.birth.path
       };
 
       const weaningImg = {
-        blob: images.weaning.isModified ? images.weaning.blob : existingEventPhotos.current.weaning.blob,
+        blob: images.weaning.isModified ? (images.weaning.blob || null) : existingEventPhotos.current.weaning.blob,
         url: images.weaning.isModified ? null : existingEventPhotos.current.weaning.path
       };
 
@@ -500,8 +521,8 @@ export default function AnimalForm({ initialValues, onSubmitSuccess, onCancel, o
           father_id: data.father_id || null,
           origin_service_id: data.origin_service_id || null,
           observations: data.observations || null,
-          photo_path: mainImg.url,
-          photo_blob: mainImg.blob || (isEditing ? initialValues.photo_blob : null),
+          photo_path: photoPathToSave,
+          photo_blob: photoBlobToSave,
           last_weight_kg: finalWeight,
           last_weight_date: finalWeightDate,
           created_at: isEditing ? initialValues.created_at : now,

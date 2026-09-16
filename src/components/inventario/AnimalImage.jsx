@@ -28,13 +28,16 @@ export default function AnimalImage({
     setImgError(false);
     let objectUrl = null;
 
-    if (photoBlob) {
+    const effectiveBlob = photoBlob || dbAnimal?.photo_blob || null;
+    const effectivePath = photoPath || dbAnimal?.photo_path || null;
+
+    if (effectiveBlob) {
       // Prioridad 1: Siempre usar la imagen física que tenemos en el disco duro (Dexie)
-      objectUrl = URL.createObjectURL(photoBlob);
+      objectUrl = URL.createObjectURL(effectiveBlob);
       setImgSrc(objectUrl);
-    } else if (photoPath) {
+    } else if (effectivePath) {
       // Prioridad 2: Solo si no hay archivo físico, intentamos cargar desde la nube de Supabase
-      setImgSrc(photoPath);
+      setImgSrc(effectivePath);
     } else {
       setImgSrc(null);
     }
@@ -45,7 +48,7 @@ export default function AnimalImage({
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [photoPath, photoBlob]);
+  }, [photoPath, photoBlob, dbAnimal?.photo_blob, dbAnimal?.photo_path]);
 
   // --- 2. LÓGICA DE ICONO ---
   const finalSex = dbAnimal?.sex || sex;

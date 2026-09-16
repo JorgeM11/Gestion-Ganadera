@@ -12,13 +12,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 /**
- * Custom Fetch con Timeout estricto de 3 segundos.
+ * Custom Fetch con Timeout diferenciado:
+ * 60 segundos para Storage (subida/descarga de fotos pesadas)
+ * y 15 segundos para consultas API estándar.
  * Evita el "agujero negro" de 2 minutos cuando el Service Worker 
- * o una red inestable (Lie-Fi) secuestran la petición.
+ * o una red inestable secuestran la petición, sin cortar subidas de imágenes.
  */
 const fetchWithTimeout = async (url, options) => {
+  const urlStr = typeof url === 'string' ? url : (url?.url || '');
+  const isStorage = urlStr.includes('/storage/v1/');
+  const timeoutMs = isStorage ? 60000 : 15000;
+
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 3000); // Corta la petición a los 3 segundos
+  const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(url, { ...options, signal: controller.signal });
     clearTimeout(id);

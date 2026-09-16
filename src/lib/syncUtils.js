@@ -40,17 +40,16 @@ export async function processSyncQueue() {
 
       // --- IMÁGENES: subir blob local si aún no tiene URL remota ---
       if (item.payload.photo_blob && !payloadToUpload.photo_path) {
-        try {
-          const fileName = `offline-sync-${item.table_name}-${payloadToUpload.id}`;
-          const url = await withTimeout(
-            uploadImageToSupabase(item.payload.photo_blob, fileName),
-            30000 // 30s de gracia para redes 3G lentas
-          );
-          payloadToUpload.photo_path = url;
-          await db.table(item.table_name).update(payloadToUpload.id, { photo_path: url });
-        } catch (imgErr) {
-          console.warn(`[Sync Engine] Imagen no subida aún (${imgErr.message}). Continuando subida de datos de ${item.table_name}...`);
-        }
+        const fileName = `offline-sync-${item.table_name}-${payloadToUpload.id}`;
+        const url = await withTimeout(
+          uploadImageToSupabase(item.payload.photo_blob, fileName),
+          45000 // 45s de gracia para subida de imagen en redes lentas
+        );
+        payloadToUpload.photo_path = url;
+        // Guardamos photo_path en Dexie manteniendo el photo_blob intacto
+        await db.table(item.table_name).update(payloadToUpload.id, { photo_path: url });
+        // También actualizamos en el payload local por si la subida a BD fallara luego
+        item.payload.photo_path = url;
       }
 
       // --- SUBIDA A BASE DE DATOS ---
@@ -214,25 +213,30 @@ export async function pullFromServer() {
     }
 
     if (serverData && serverData.length > 0) {
-      // 1. Descarga de imágenes en paralelo sin bloquear
+      // 1. Descarga de imágenes en paralelo y preservación estricta de blobs locales
       if (table === 'animals' || table === 'growth_events') {
         await Promise.allSettled(
           serverData.map(async (record) => {
-            if (record.photo_path) {
+            // A) Si ya tenemos el registro en Dexie localmente con su photo_blob físico, NUNCA sobreescribirlo con undefined
+            const localRecord = await db.table(table).get(record.id);
+            if (localRecord?.photo_blob) {
+              record.photo_blob = localRecord.photo_blob;
+            } else if (record.photo_path) {
+              // B) Si es un registro nuevo o no tiene blob local, intentar descargarlo
               try {
-                const response = await withTimeout(fetch(record.photo_path), 10000);
+                const response = await withTimeout(fetch(record.photo_path), 15000);
                 if (response.ok) {
                   record.photo_blob = await response.blob();
                 }
               } catch (imgErr) {
-                // Ignorar silenciosamente, la imagen se intentará cargar por URL luego
+                // Silencioso: la imagen cargará por URL pública mientras haya red
               }
             }
           })
         );
       }
 
-      // 2. Guardado en Dexie: 1 sola transacción en bloque
+      // 2. Guardado en Dexie: 1 sola transacción en bloque sin pérdida de blobs
       await db.table(table).bulkPut(serverData);
     }
 
