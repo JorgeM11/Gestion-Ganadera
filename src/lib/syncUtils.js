@@ -2,6 +2,7 @@ import { db } from './db';
 import { supabase } from './supabaseClient';
 import { useSyncStore } from '@/store/syncStore';
 import { uploadImageToSupabase } from './imageUtils';
+import { logoutUser } from './authService';
 
 let isSyncing = false;
 
@@ -284,6 +285,45 @@ export async function pullFromServer() {
 }
 
 /**
+ * Verifica si la cuenta del usuario fue deshabilitada o eliminada en el servidor.
+ * En caso de haber sido deshabilitada:
+ * 1. Actualiza el estado local en Dexie.
+ * 2. Cierra la sesión activa.
+ * 3. Redirige a /login con aviso de cuenta deshabilitada tras haber guardado los cambios.
+ */
+export async function verifyUserStatusAndHandleDisabled(userId) {
+  if (!userId || !navigator.onLine) return false;
+
+  try {
+    const { data: serverUser, error } = await withTimeout(
+      supabase
+        .from('usuarios')
+        .select('id, status, deleted_at')
+        .eq('id', userId)
+        .limit(1)
+        .maybeSingle(),
+      8000
+    );
+
+    if (!error && serverUser) {
+      if (serverUser.status !== 'Activo' || serverUser.deleted_at) {
+        console.warn('[Sync Engine] Cuenta deshabilitada en el servidor. Guardando cambios y cerrando sesión...');
+        await db.usuarios.update(userId, { status: serverUser.status || 'Inactivo' });
+        logoutUser();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login?reason=account_disabled';
+        }
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn('[Sync Engine] Verificación de estado de usuario omitida:', err.message);
+  }
+
+  return false;
+}
+
+/**
  * 3. MASTER SYNC: El Orquestador. 
  */
 export async function runFullSync() {
@@ -301,10 +341,20 @@ export async function runFullSync() {
 
   let hasErrors = false;
 
+  // A) Guardar cambios locales pendientes hacia Supabase
   try {
     await processSyncQueue();
   } catch (err) {
     hasErrors = true;
+  }
+
+  // B) Verificar si la cuenta del usuario fue deshabilitada por el administrador
+  const activeUserId = localStorage.getItem('ganadera_user_id');
+  const wasDisabled = await verifyUserStatusAndHandleDisabled(activeUserId);
+  if (wasDisabled) {
+    store.setSyncStatus('IDLE');
+    isSyncing = false;
+    return;
   }
 
   try {
@@ -376,6 +426,14 @@ export async function forceFullResync() {
       await processSyncQueue();
     } catch (pushErr) {
       console.warn('[Sync Engine] Advertencia procesando cola antes del respaldo forzado:', pushErr.message);
+    }
+
+    // Verificar si la cuenta fue deshabilitada en el servidor tras respaldar cambios
+    const activeUserId = localStorage.getItem('ganadera_user_id');
+    const wasDisabled = await verifyUserStatusAndHandleDisabled(activeUserId);
+    if (wasDisabled) {
+      store.setSyncStatus('IDLE');
+      return false;
     }
 
     // 1. Retrocedemos el reloj al inicio de los tiempos

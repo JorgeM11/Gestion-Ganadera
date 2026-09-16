@@ -74,66 +74,63 @@ export async function authenticateUser(email, password) {
   const cleanEmail = email.trim().toLowerCase();
   const passHash = await hashPassword(password);
 
-  // Intentar primero con conexión a Supabase
-  if (navigator.onLine) {
-    try {
-      const { data: users, error } = await supabase
-        .from('usuarios')
-        .select('*')
-        .eq('email', cleanEmail)
-        .limit(1);
+  // 1. Validar conexión a internet: Requerida obligatoriamente para iniciar sesión
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    return {
+      success: false,
+      message: 'No tienes conexión a internet. Se requiere conexión activa para iniciar sesión.'
+    };
+  }
 
-      if (!error && users && users.length > 0) {
-        const user = users[0];
+  // 2. Validar con Supabase en la nube
+  try {
+    const { data: users, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('email', cleanEmail)
+      .limit(1);
 
-        // Validar status
-        if (user.status !== 'Activo') {
-          return {
-            success: false,
-            message: `Acceso denegado. Tu cuenta se encuentra en estado: ${user.status}.`
-          };
-        }
-
-        // Validar contraseña
-        if (user.password_hash === passHash) {
-          // Guardar en Dexie local para acceso offline continuo
-          await db.usuarios.put(user);
-          saveSessionLocally(user);
-          // Disparar sincronización de fondo
-          setTimeout(() => runFullSync(), 500);
-          return { success: true, user };
-        } else {
-          return { success: false, message: 'Correo o contraseña incorrectos.' };
-        }
-      }
-    } catch (netErr) {
-      console.warn('[Auth] Fallo conexión con Supabase, intentando validación local:', netErr.message);
+    if (error) {
+      return {
+        success: false,
+        message: 'No se pudo conectar con el servidor. Verifica tu conexión a internet.'
+      };
     }
-  }
 
-  // Si está offline o falló la conexión remota: Validar en Dexie local
-  const localUser = await db.usuarios.where('email').equalsIgnoreCase(cleanEmail).first();
+    if (!users || users.length === 0) {
+      return {
+        success: false,
+        message: 'Correo o contraseña incorrectos.'
+      };
+    }
 
-  if (!localUser) {
+    const user = users[0];
+
+    // Validar status
+    if (user.status !== 'Activo') {
+      return {
+        success: false,
+        message: `Acceso denegado. Tu cuenta se encuentra en estado: ${user.status}.`
+      };
+    }
+
+    // Validar contraseña
+    if (user.password_hash === passHash) {
+      // Guardar en Dexie local para acceso continuo una vez autenticado
+      await db.usuarios.put(user);
+      saveSessionLocally(user);
+      // Disparar sincronización de fondo
+      setTimeout(() => runFullSync(), 500);
+      return { success: true, user };
+    } else {
+      return { success: false, message: 'Correo o contraseña incorrectos.' };
+    }
+  } catch (netErr) {
     return {
       success: false,
-      message: 'Usuario no encontrado. Se requiere conexión a internet para iniciar sesión por primera vez.'
+      message: 'Error de red con el servidor. Se requiere internet para iniciar sesión.'
     };
   }
-
-  if (localUser.status !== 'Activo') {
-    return {
-      success: false,
-      message: `Acceso denegado. Tu cuenta se encuentra en estado: ${localUser.status}.`
-    };
-  }
-
-  if (localUser.password_hash === passHash) {
-    saveSessionLocally(localUser);
-    return { success: true, user: localUser };
-  }
-
-  return { success: false, message: 'Correo o contraseña incorrectos.' };
 }
 
 /**

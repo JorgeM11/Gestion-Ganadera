@@ -20,9 +20,17 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState(null);
+  const [disabledAccountNotice, setDisabledAccountNotice] = useState(false);
 
   useEffect(() => {
     seedInitialAdminIfNeeded().catch(() => {});
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("reason") === "account_disabled") {
+        setDisabledAccountNotice(true);
+      }
+    }
 
     const userId = localStorage.getItem("ganadera_user_id");
     if (userId) {
@@ -117,6 +125,22 @@ export default function LoginPage() {
             </div>
 
             <AnimatePresence>
+              {disabledAccountNotice && (
+                <MotionDiv
+                  initial={{ opacity: 0, y: -6, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -6, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  role="alert"
+                  className="bg-amber-50 border border-amber-200/90 rounded-2xl p-3.5 flex items-start gap-2.5 mb-5 shadow-2xs overflow-hidden"
+                >
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="font-sans text-xs sm:text-sm font-medium text-amber-800 m-0 leading-snug">
+                    Tu cuenta ha sido deshabilitada por el administrador. Tus cambios pendientes fueron guardados y sincronizados exitosamente antes de cerrar la sesión.
+                  </p>
+                </MotionDiv>
+              )}
+
               {serverError && (
                 <MotionDiv
                   initial={{ opacity: 0, y: -6, height: 0 }}
