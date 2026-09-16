@@ -197,7 +197,7 @@ export default function DetailsTab({ animal, onEdit }) {
               <span className="font-black text-base text-neutral-900">#{animal.number}</span>
             </InfoTile>
 
-            <InfoTile label="Finca / Predio" icon={Building2}>
+            <InfoTile label="Finca" icon={Building2}>
               <span className="font-bold text-sm text-neutral-800 truncate block">
                 {farm?.name ? `${farm.name}${farm.location ? ` (${farm.location})` : ''}` : 'Sin finca asignada'}
               </span>

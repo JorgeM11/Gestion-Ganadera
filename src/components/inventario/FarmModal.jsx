@@ -125,7 +125,7 @@ export default function FarmModal({ isOpen, onClose, onFarmCreated, onFarmUpdate
                     {activeView === 'edit' ? 'Editar Finca' : 'Gestión de Fincas'}
                   </h3>
                   <p className="text-xs text-neutral-500">
-                    {activeView === 'edit' ? `Modificando "${editingFarm?.name}"` : 'Predios y haciendas ganaderas'}
+                    {activeView === 'edit' ? `Modificando "${editingFarm?.name}"` : 'Fincas y haciendas ganaderas'}
                   </p>
                 </div>
               </div>
